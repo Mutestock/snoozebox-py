@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  audio_archiver_postgres:
+    container_name: audio_archiver_postgres
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=
+      - PGDATA=/var/lib/postgresql/data
+    ports:
+      - 13338:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  audio_archiver_cache:
+    container_name: audio_archiver_cache
+    image: redis:latest
+    restart: always
+    ports:
+      - 13339:6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass audio_archiver_cache_pass
+    volumes:
+      - ./data/redis:/data

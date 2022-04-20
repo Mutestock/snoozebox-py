@@ -1,0 +1,80 @@
+syntax = "proto3";
+package channel;
+
+service Channel{
+    rpc CreateChannel(CreateChannelRequest) returns (CreateChannelResponse){}
+    rpc ReadChannel(ReadChannelRequest) returns (ReadChannelResponse){}
+    rpc UpdateChannel(UpdateChannelRequest) returns (UpdateChannelResponse){}
+    rpc DeleteChannel(DeleteChannelRequest) returns (DeleteChannelResponse){}
+    rpc ReadChannelList(ReadChannelListRequest) returns (ReadChannelListResponse){}
+}
+
+// ===================== Utils ========================
+
+message ChannelObject{
+    int32 id = 1;
+    string title = 2;
+    bool channel_is_alive = 3;
+    string url = 4;
+    string updated_at = 5;
+    string created_at = 6;
+}
+
+message NewChannelObject{
+    string title = 1;
+    string channel_is_alive = 2;
+    bool url = 3;
+
+}
+
+// =================== Request ===================
+
+message CreateChannelRequest {
+    NewChannelObject new_channel_object = 1;
+}
+
+message ReadChannelRequest {
+    int32 id = 1;
+}
+
+message ReadChannelByTitleRequest {
+    string title = 1;
+}
+
+message UpdateChannelRequest {
+    int32 id = 1;
+    NewChannelObject new_channel_object = 2;
+}
+
+message DeleteChannelRequest {
+    int32 id = 1;
+}
+
+message ReadChannelListRequest {}
+
+// ========================= Response ==========================
+
+
+message CreateChannelResponse {
+    string msg = 1;
+}
+
+message ReadChannelResponse {
+    ChannelObject channel_object = 1;
+    string msg = 2;
+}
+
+message UpdateChannelResponse {
+    string msg = 1;
+}
+
+message DeleteChannelResponse {
+    string msg = 1;
+}
+
+message ReadChannelListResponse {
+    repeated ChannelObject channel_objects = 1;
+    string msg = 2;
+}
+
+
