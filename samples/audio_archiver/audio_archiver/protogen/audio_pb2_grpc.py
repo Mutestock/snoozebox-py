@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import logic.protogen.audio_pb2 as audio__pb2
+import protogen.audio_pb2 as audio__pb2
 
 
 class AudioStub(object):

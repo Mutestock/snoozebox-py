@@ -5,6 +5,7 @@ _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT_DIR = os.path.dirname(_ROOT_DIR)
 
 ROOT_DIR = os.path.dirname(_ROOT_DIR)
+TEMPLATES_DIR = ROOT_DIR + "/audio_archiver/service/frontend/templates"
 CONFIG_FILE_PATH = ROOT_DIR + "/config.toml"
 CONFIG = {}
 

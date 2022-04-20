@@ -6,9 +6,9 @@ services:
     image: postgres:latest
     restart: always
     environment:
-      - POSTGRES_USER=
-      - POSTGRES_PASSWORD=
-      - POSTGRES_DB=
+      - POSTGRES_USER=archiver_pg_usr
+      - POSTGRES_PASSWORD=archiver_pg_pwd
+      - POSTGRES_DB=archiver_pg_local
       - PGDATA=/var/lib/postgresql/data
     ports:
       - 13338:5432

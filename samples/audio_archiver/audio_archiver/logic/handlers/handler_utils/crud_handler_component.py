@@ -1,4 +1,4 @@
-from turtle import st
+
 from sqlalchemy import insert, delete, update, select, inspect
 from connection.pg_connection import exec_stmt
 
@@ -6,8 +6,8 @@ from connection.pg_connection import exec_stmt
 
 
 class CrudHandlerComponent:
-    def __init__(self, object_instance: object):
-        self.table = inspect(object_instance).local_table
+    def __init__(self, object_instance):
+        self.table = object_instance.__table__
 
     def create(self, obj: object):
         exec_stmt(insert(self.table).values(obj))

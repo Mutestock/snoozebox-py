@@ -41,6 +41,7 @@ def get_yt_video_info(url: str) -> dict:
     except Exception as e:
         print("Shit happened: ")
         print(e)
+        return {"status": "server error"}
         
 
 def download_yt_video(url: str):

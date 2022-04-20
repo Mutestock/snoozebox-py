@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import logic.protogen.channel_pb2 as channel__pb2
+import protogen.channel_pb2 as channel__pb2
 
 
 class ChannelStub(object):

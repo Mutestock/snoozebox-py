@@ -3,7 +3,11 @@
 audio_output_folder="./output"
 
 
-[local.server]
+[local.grpc]
+host="localhost"
+port=13336
+
+[local.flask]
 host="localhost"
 port=13337
 
