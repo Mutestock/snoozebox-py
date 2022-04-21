@@ -21,7 +21,7 @@ db_pwd="archiver_pg_pwd"
 [local.db.redis]
 host="localhost"
 port=13339
-pwd="archiver_cache_pwd"
+pwd="audio_archiver_cache_pass"
 
 
 
@@ -47,5 +47,5 @@ db_pwd="archiver_pg_test_pwd"
 [test.db.redis]
 host="localhost"
 port=13339
-pwd="archiver_cache_pwd"
+pwd="audio_archiver_cache_pass"
 
