@@ -24,3 +24,17 @@ services:
     command: redis-server --save 20 1 --loglevel warning --requirepass audio_archiver_cache_pass
     volumes:
       - ./data/redis:/data
+
+  audio_archiver_postgres_test:
+    container_name: audio_archiver_postgres_test
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=archiver_pg_test_usr
+      - POSTGRES_PASSWORD=archiver_pg_test_pwd
+      - POSTGRES_DB=archiver_pg_test_db
+      - PGDATA=/var/lib/postgresql/data
+    ports:
+      - 13340:5432
+    volumes:
+      - ./data/postgres_test:/var/lib/postgresql/data

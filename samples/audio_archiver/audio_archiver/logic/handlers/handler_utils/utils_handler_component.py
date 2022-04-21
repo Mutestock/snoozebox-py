@@ -6,6 +6,5 @@ class UtilsHandlerComponent:
     def __init__(self, object_instance):
         self.table = object_instance.__table__
 
-
-    def count(self):
+    def count(self) -> int:
         return select([func.count()]).select_from(self.table).scalar()

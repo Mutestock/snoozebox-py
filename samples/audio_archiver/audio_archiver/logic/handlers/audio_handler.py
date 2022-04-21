@@ -25,12 +25,17 @@ class AudioHandler:
         self, request: audio_pb2.CreateAudioRequest
     ) -> audio_pb2.CreateAudioResponse:
         try:
-            self.crud_component.create(Audio(grpc_audio_object=request).__dict__)
+            self.crud_component.create(Audio(grpc_audio_object=request))
             return audio_pb2.CreateAudioResponse(msg=SUCCESFUL_TRANSACTION)
         except Exception as e:
-            return audio_pb2.CreateAudioResponse(msg=make_error_message(e))
+            print(e)
+            return audio_pb2.CreateAudioResponse(
+                msg=make_error_message(e) + " " + str(request)
+            )
 
-    def read(self, request: audio_pb2.ReadAudioRequest) -> audio_pb2.ReadAudioResponse:
+    def read(
+        self, request: audio_pb2.ReadAudioRequest
+    ) -> audio_pb2.ReadAudioResponse:
         try:
             audio = self.crud_component.read(request[0])
             return audio_pb2.ReadAudioResponse(

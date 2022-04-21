@@ -19,6 +19,11 @@ CONFIG = toml.loads(_content)
 
 def get_config_with_mode() -> dict:
     # Add more modes here. E.g. production
+    if os.getenv("AUDIO_ARCHIVER_TESTING"):
+        print("EXECUTION MODE IS: test")
+        return CONFIG["test"]
+    
+    print("EXECUTION MODE IS: local")
     return CONFIG["local"]
 
 CONFIG = get_config_with_mode()

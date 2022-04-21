@@ -17,6 +17,7 @@ youtube_dl = "^2021.12.17"
 Flask = "^2.1.1"
 pipe = "^1.6.0"
 nose2 = "^0.11.0"
+SQLAlchemy-Utils = "^0.38.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -24,6 +25,7 @@ black = {version = "^22.3.0", allow-prereleases = true}
 pylint = "^2.13.7"
 mypy = "^0.942"
 types-toml = "^0.10.5"
+types-redis = "^4.1.22"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

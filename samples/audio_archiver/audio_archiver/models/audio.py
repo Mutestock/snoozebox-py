@@ -15,14 +15,14 @@ class Audio(Base):
         duration: str = None,
         url: str = None,
         grpc_audio_object: audio_pb2.NewAudioObject = None,
-    ):
+    ) -> None:
         if grpc_audio_object:
             self.channel_id = grpc_audio_object.channel_id
             self.title = grpc_audio_object.title
             self.status = grpc_audio_object.status
             self.duration = grpc_audio_object.duration
             self.url = grpc_audio_object.url
-        else:    
+        else:
             self.channel_id = channel_id
             self.title = title
             self.status = status
@@ -35,8 +35,8 @@ class Audio(Base):
     status = Column(String(50), nullable=False)
     duration = Column(String(100), nullable=False)
     url = Column(String(200), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now())
-    created_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def to_grpc_object(self) -> audio_pb2.AudioObject:
         return audio_pb2.AudioObject(

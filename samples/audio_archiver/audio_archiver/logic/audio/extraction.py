@@ -15,7 +15,7 @@ class YtLogger(object):
         print(msg)
 
 
-def my_hook(d):
+def my_hook(d) -> None:
     if d['status'] == 'finished':
         print('Done downloading, now converting ...')
 

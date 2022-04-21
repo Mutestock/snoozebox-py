@@ -25,10 +25,13 @@ class ChannelHandler:
         self, request: channel_pb2.CreateChannelRequest
     ) -> channel_pb2.CreateChannelResponse:
         try:
-            self.crud_component.create(Channel(grpc_channel_object=request).__dict__)
+            self.crud_component.create(Channel(grpc_channel_object=request))
             return channel_pb2.CreateChannelResponse(msg=SUCCESFUL_TRANSACTION)
         except Exception as e:
-            return channel_pb2.CreateChannelResponse(msg=make_error_message(e))
+            print(e)
+            return channel_pb2.CreateChannelResponse(
+                msg=make_error_message(e) + " " + str(request)
+            )
 
     def read(
         self, request: channel_pb2.ReadChannelRequest

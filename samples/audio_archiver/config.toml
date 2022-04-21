@@ -2,7 +2,6 @@
 [local]
 audio_output_folder="./output"
 
-
 [local.grpc]
 host="localhost"
 port=13336
@@ -20,6 +19,32 @@ db_user="archiver_pg_usr"
 db_pwd="archiver_pg_pwd"
 
 [local.db.redis]
+host="localhost"
+port=13339
+pwd="archiver_cache_pwd"
+
+
+
+[test]
+audio_output_folder="./output"
+
+[test.grpc]
+host="localhost"
+port=13336
+
+[test.flask]
+host="localhost"
+port=13337
+
+[test.db]
+[test.db.postgres]
+host="localhost"
+port=13340
+db_name="archiver_pg_test_db"
+db_user="archiver_pg_test_usr"
+db_pwd="archiver_pg_test_pwd"
+
+[test.db.redis]
 host="localhost"
 port=13339
 pwd="archiver_cache_pwd"

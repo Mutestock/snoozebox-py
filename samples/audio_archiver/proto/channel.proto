@@ -23,8 +23,8 @@ message ChannelObject {
 
 message NewChannelObject {
   string title = 1;
-  string channel_is_alive = 2;
-  bool url = 3;
+  bool channel_is_alive = 2;
+  string url = 3;
 }
 
 // =================== Request ===================

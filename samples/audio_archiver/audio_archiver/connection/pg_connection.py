@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from utils.config import CONFIG
+from typing import Optional, Any
 
 PG_CONFIG = CONFIG["db"]["postgres"]
 
@@ -9,12 +10,15 @@ engine = create_engine(conn_string, pool_size=20, max_overflow=0)
 Base = declarative_base()
 
 
-def db_init():
-    Base.metadata.create_all(engine)
 
-def exec_stmt(stmt):
+def db_init() -> None:
+    Base.metadata.create_all(bind=engine, checkfirst=True)
+    
+def db_drop() -> None:
+    Base.metadata.drop_all(bind=engine, checkfirst=True)
+
+
+def exec_stmt(stmt) -> Optional[Any]:
     with engine.connect() as conn:
         result = conn.execute(stmt)
-        conn.commit()
         return result
-    
