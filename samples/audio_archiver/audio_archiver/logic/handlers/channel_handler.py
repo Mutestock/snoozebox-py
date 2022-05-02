@@ -11,6 +11,8 @@ from logic.handlers.handler_utils.generic_tools import (
 )
 from models.channel import Channel
 from pipe import map
+import logging
+import json
 
 
 class ChannelHandler:
@@ -36,12 +38,16 @@ class ChannelHandler:
     def read(
         self, request: channel_pb2.ReadChannelRequest
     ) -> channel_pb2.ReadChannelResponse:
+        channel: dict = {}
         try:
-            channel = self.crud_component.read(request[0])
+            channel = self.crud_component.read(request.id)
             return channel_pb2.ReadChannelResponse(
-                channel_object=channel.to_grpc_object(), msg=SUCCESFUL_TRANSACTION
+                channel_object=channel, msg=SUCCESFUL_TRANSACTION
             )
         except Exception as e:
+            logging.error(
+                f"Channel read failed id: {request.id}, Error: {e}, channel = {channel}, type = {type(e)}"
+            )
             return channel_pb2.ReadChannelResponse(msg=make_error_message(e))
 
     def update(
@@ -64,15 +70,13 @@ class ChannelHandler:
             return channel_pb2.DeleteChannelResponse(msg=make_error_message(e))
 
     def read_list(
-        self, request: channel_pb2.ReadChannelListRequest
+        self, _: channel_pb2.ReadChannelListRequest
     ) -> channel_pb2.ReadChannelListResponse:
         try:
             return channel_pb2.ReadChannelListResponse(
-                channel_objects=list(
-                    self.crud_component.read_list()
-                    | map(lambda channel: channel.to_grpc_object())
-                ),
+                channel_objects=self.crud_component.read_list(),
                 msg=SUCCESFUL_TRANSACTION,
             )
         except Exception as e:
+            logging.error(f"Channel read list failed: Error: {e}, type: {type(e)}")
             return channel_pb2.ReadChannelListResponse(msg=make_error_message(e))

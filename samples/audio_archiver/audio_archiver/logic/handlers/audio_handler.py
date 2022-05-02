@@ -64,7 +64,7 @@ class AudioHandler:
             return audio_pb2.DeleteAudioResponse(msg=make_error_message(e))
 
     def read_list(
-        self, request: audio_pb2.ReadAudioListRequest
+        self, _: audio_pb2.ReadAudioListRequest
     ) -> audio_pb2.ReadAudioListResponse:
         try:
             return audio_pb2.ReadAudioListResponse(

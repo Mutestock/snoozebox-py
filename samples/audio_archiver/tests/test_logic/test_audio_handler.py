@@ -12,6 +12,7 @@ sys.path.append(test_dir_directory)
 from models.audio import Audio
 from logic.handlers.audio_handler import AudioHandler
 from connection.pg_connection import db_init, engine
+from connection.redis_connection import redis_flush
 from sqlalchemy_utils import create_database, drop_database, database_exists
 from tests.dummy_data.dummy_data_execution import create_dummy_data
 
@@ -21,15 +22,18 @@ class TestAudioArchiver(unittest.TestCase):
     audio_handler = AudioHandler()
 
     def setUp(self):
-        if not database_exists(engine.url):
-            create_database(engine.url)
+        #if not database_exists(engine.url):
+        #    create_database(engine.url)
         db_init()
-        create_dummy_data(engine, "channel")
-        create_dummy_data(engine, "audio")
+        redis_flush()
+        #create_dummy_data(engine, "channel")
+        #create_dummy_data(engine, "audio")
+
 
     def tearDown(self):
-        if database_exists(engine.url):
-            drop_database(engine.url)
+        #if database_exists(engine.url):
+        #    drop_database(engine.url)
+        pass
 
     def test_create_audio(self):
         audio = Audio(
@@ -49,12 +53,11 @@ class TestAudioArchiver(unittest.TestCase):
         self.assertEqual(audio_from_database.title, "some_inserted_audio01")
 
     def test_read_audio(self):
-        audio_tracks = self.assertEqual(self.audio_handler.crud_components.read_list())
-        self.assertEqual(len(audio_tracks), 9)
+        self.assertTrue(self.audio_handler.crud_component.read(6)!=None)
 
     def test_update_audio(self):
         self.audio_handler.crud_component.update(
-            5,
+            7,
             Audio(
                 title="some_updated_audio01",
                 channel_id=7,
@@ -65,7 +68,7 @@ class TestAudioArchiver(unittest.TestCase):
         )
         audio_from_database = (
             engine.connect()
-            .execute("SELECT * FROM audio WHERE url='some_updated_audio01'")
+            .execute("SELECT * FROM audio WHERE url='some_url_01'")
             .fetchone()
         )
         self.assertEqual("some_updated_audio01", audio_from_database.title)
@@ -79,8 +82,8 @@ class TestAudioArchiver(unittest.TestCase):
             .fetchone()
         )
 
-        self.assertEqual(audio_from_database)
+        self.assertEqual(audio_from_database, None)
 
     def test_read_audio_list(self):
         audio_tracks = self.audio_handler.crud_component.read_list()
-        self.assertEqual(len(audio_tracks), 9)
+        self.assertTrue(len(audio_tracks)>0)

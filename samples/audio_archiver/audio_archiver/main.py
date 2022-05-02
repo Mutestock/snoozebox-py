@@ -3,6 +3,7 @@ import multiprocessing
 from service.frontend.flask_templates import run_templates
 from service.grpc.grpc_main import run_grpc
 from connection.pg_connection import db_init
+from utils.logging import setup_logger
 
 
 
@@ -11,6 +12,7 @@ from connection.pg_connection import db_init
 
 def main() -> None:
     db_init()
+    setup_logger()
     
     flask_process = multiprocessing.Process(target=run_templates)
     grpc_process = multiprocessing.Process(target=run_grpc)
