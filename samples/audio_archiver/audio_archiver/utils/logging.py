@@ -1,7 +1,10 @@
 import logging
+import os
 from utils.config import LOG_FILE_PATH
 
 def setup_logger():
+    if not os.path.exists(LOG_FILE_PATH):
+        os.mkdir(LOG_FILE_PATH)
     logging.basicConfig(filename=f"{LOG_FILE_PATH}/log.log", encoding='utf-8', level=logging.DEBUG)
     
 def decoration_logger(func):

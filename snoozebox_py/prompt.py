@@ -1,0 +1,3 @@
+def cake():
+    pass
+

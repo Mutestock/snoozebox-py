@@ -26,4 +26,6 @@ def get_config_with_mode() -> dict:
     print("EXECUTION MODE IS: local")
     return CONFIG["local"]
 
+
 CONFIG = get_config_with_mode()
+print(f"Running on: {CONFIG['grpc']['host']}:{CONFIG['grpc']['port']}")
