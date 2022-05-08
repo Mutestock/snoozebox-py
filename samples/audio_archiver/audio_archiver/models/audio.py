@@ -17,11 +17,11 @@ class Audio(Base):
         grpc_audio_object: audio_pb2.NewAudioObject = None,
     ) -> None:
         if grpc_audio_object:
-            self.channel_id = grpc_audio_object.channel_id
-            self.title = grpc_audio_object.title
-            self.status = grpc_audio_object.status
-            self.duration = grpc_audio_object.duration
-            self.url = grpc_audio_object.url
+            self.channel_id = grpc_audio_object.new_audio_object.channel_id
+            self.title = grpc_audio_object.new_audio_object.title
+            self.status = grpc_audio_object.new_audio_object.status
+            self.duration = grpc_audio_object.new_audio_object.duration
+            self.url = grpc_audio_object.new_audio_object.url
         else:
             self.channel_id = channel_id
             self.title = title

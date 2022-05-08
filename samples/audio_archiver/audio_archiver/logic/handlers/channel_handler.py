@@ -12,7 +12,6 @@ from logic.handlers.handler_utils.generic_tools import (
 from models.channel import Channel
 from pipe import map
 import logging
-import json
 
 
 class ChannelHandler:

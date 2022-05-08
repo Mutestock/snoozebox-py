@@ -11,6 +11,7 @@ from logic.handlers.handler_utils.generic_tools import (
 )
 from models.audio import Audio
 from pipe import map
+import logging
 
 
 class AudioHandler:
@@ -28,20 +29,24 @@ class AudioHandler:
             self.crud_component.create(Audio(grpc_audio_object=request))
             return audio_pb2.CreateAudioResponse(msg=SUCCESFUL_TRANSACTION)
         except Exception as e:
-            print(e)
+            logging.error(
+                f"Audio create failed content: {request.title}, Error: {e}, type = {type(e)}"
+            )
             return audio_pb2.CreateAudioResponse(
                 msg=make_error_message(e) + " " + str(request)
             )
 
-    def read(
-        self, request: audio_pb2.ReadAudioRequest
-    ) -> audio_pb2.ReadAudioResponse:
+    def read(self, request: audio_pb2.ReadAudioRequest) -> audio_pb2.ReadAudioResponse:
+        audio: dict = {}
         try:
-            audio = self.crud_component.read(request[0])
+            audio = self.crud_component.read(request.id)
             return audio_pb2.ReadAudioResponse(
-                audio_object=audio.to_grpc_object(), msg=SUCCESFUL_TRANSACTION
+                audio_object=audio, msg=SUCCESFUL_TRANSACTION
             )
         except Exception as e:
+            logging.error(
+                f"Audio read failed id: {request.id}, Error: {e}, audio = {audio}, type = {type(e)}"
+            )
             return audio_pb2.ReadAudioResponse(msg=make_error_message(e))
 
     def update(
@@ -68,11 +73,9 @@ class AudioHandler:
     ) -> audio_pb2.ReadAudioListResponse:
         try:
             return audio_pb2.ReadAudioListResponse(
-                audio_objects=list(
-                    self.crud_component.read_list()
-                    | map(lambda audio: audio.to_grpc_object())
-                ),
+                audio_objects=self.crud_component.read_list(),
                 msg=SUCCESFUL_TRANSACTION,
             )
         except Exception as e:
+            logging.error(f"Audio read list failed: Error: {e}, type: {type(e)}")
             return audio_pb2.ReadAudioListResponse(msg=make_error_message(e))
