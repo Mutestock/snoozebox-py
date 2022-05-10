@@ -1,5 +1,10 @@
 import click
-import os
+from utils.pathing import (
+    create_directories_if_not_exists,
+    create_empty_files_if_not_exists,
+)
+
+from snoozefile.snoozefile import generate_snoozefile
 
 
 @click.group()
@@ -8,13 +13,14 @@ def manager():
 
 
 @manager.command()
-@click.option("--data-path",  help="Configures the snoozefile to point to an already existing directory containing data")
-def init():
-    if not os.path.exists("schematics"):
-        os.mkdir("schematics")
-    if not os.path.exists("snoozefile.toml"):
-        open("snoozefile.toml","w").close()
-    
+@click.option(
+    "--data-path",
+    help="Configures the snoozefile to point to an already existing directory containing data",
+)
+def init(data_path):
+    create_directories_if_not_exists(["schematics", "services"])
+    create_empty_files_if_not_exists(["snoozefile.toml", "docker-compose.yml"])
+    generate_snoozefile()
 
 
 @manager.command()
@@ -24,6 +30,3 @@ def generate():
 @manager.command()
 def append():
     pass
-
-
-

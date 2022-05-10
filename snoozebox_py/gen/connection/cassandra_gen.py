@@ -1,13 +1,63 @@
+from gen.couple_writer_abstract import CoupleWriter
+import textwrap
 
 
-def write_cassandra_connection():
-    pass
+class CassandraConnection(CoupleWriter):
+    subject: str = "connection"
 
+    def write(self, config: dict) -> None:
+        file_writer = open(
+            f"{config.get('connection_path')}/cassandra_connection.py", "w"
+        )
 
-def _cassandra_connection():
-    pass
+        file_writer.write(
+            textwrap.dedent(
+                f"""\
+            from cassandra.cluster import Cluster
+            from cassandra.auth import PlainTextAuthProvider
+            from utils.config import CONFIG
+            
+            CASSANDRA_CONFIG = CONFIG["database"]["cassandra"]
+            
+            auth_provider = PlainTextAuthProvider(
+                username=CASSANDRA_CONFIG["usr"], 
+                password=CASSANDRA_CONFIG["pwd],
+            )
+            
+            cluster = Cluster(
+                [CASSANDRA_CONFIG["host"]], 
+                port=CASSANDRA_CONFIG["port"], 
+                auth_provider=auth_provider
+            )
+            
+            def get_cassandra_session(keyspace: str = NONE):
+                if not keyspace:
+                    keyspace = CASSANDRA_CONFIG["keyspace"]
+                return cluster.connect(keyspace)
+            """
+            )
+        )
+        file_writer.close()
 
+    def write_test(self, config: dict) -> None:
+        file_writer = open(
+            f"{config.get('test_path')}/test_connection/test_cassandra.py", "w"
+        )
 
-def _cassandra_connection_test():
-    pass
-
+        file_writer.write(
+            textwrap.dedent(
+                f"""\
+            import unittest
+            from connection.cassandra_connection import get_cassandra_connection
+            
+            
+            class TestCassandra(unittest.testcase):
+                def test_connection(self):
+                    stmt = session.prepare("SELECT now() FROM system.local;)
+                    res = session.execute(stmt)
+                    self.assertTrue(res!=None)
+            
+        """
+            )
+        )
+        file_writer.close()

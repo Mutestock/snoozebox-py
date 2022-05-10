@@ -50,3 +50,5 @@ host="localhost"
 dependencies=["pika"]
 
 general_dependencies=["toml", "pipe", "nose2"]
+database_options=["postgres", "mongodb", "cassandra"]
+service_options=["grpc","rest","kafka","rabbitmq"]

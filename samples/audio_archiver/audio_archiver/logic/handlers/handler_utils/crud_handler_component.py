@@ -8,7 +8,6 @@ from logic.handlers.handler_utils.generic_tools import (
 from connection.redis_connection import (
     redis_get,
     redis_set,
-    redis_hset,
     redis_delete,
 )
 import logging
@@ -82,5 +81,4 @@ class CrudHandlerComponent:
         redis_delete(cache_key)
 
     def _get_cache_key(self, id) -> str:
-        # 
         return f"{self.table}-{id}"

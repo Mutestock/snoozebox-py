@@ -1,4 +1,4 @@
-from sqlalchemy import select, inspect
+from sqlalchemy import select
 from sqlalchemy import func
 
 
