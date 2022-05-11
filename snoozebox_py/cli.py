@@ -5,6 +5,7 @@ from utils.pathing import (
 )
 
 from snoozefile.snoozefile import generate_snoozefile
+from gen.prompt import run_append_prompt
 
 
 @click.group()
@@ -29,4 +30,4 @@ def generate():
 
 @manager.command()
 def append():
-    pass
+    run_append_prompt()

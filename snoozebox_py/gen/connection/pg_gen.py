@@ -6,7 +6,7 @@ class PostgresConnection(CoupleWriter):
     
     def write(self, config: dict):
         file_writer = open(
-            f"{config.get('connection_path')}/postgres_connection.py", "w"
+            f"{config['file_structure']['connection']}/postgres_connection.py", "w"
         )
         
         file_writer.writer(
@@ -44,10 +44,9 @@ class PostgresConnection(CoupleWriter):
     
     def write_test(self, config: dict):
         file_writer = open(
-            file_writer = open(
             f"{config.get('test_path')}/test_connection/test_postgres.py", "w"
         )
-        )
+        
         file_writer.write(
             textwrap.dedent(
                 """

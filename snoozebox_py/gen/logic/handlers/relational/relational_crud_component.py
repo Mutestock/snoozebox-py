@@ -73,11 +73,11 @@ class RelationalCrudComponent(CoupleWriter):
                 
                         exec_stmt(delete(self.table).where(self.table.c.id == id))
                         if redis_delete(cache_key) != 0:
-                            logging.info(f"Redis: {self.table} - id: {id} deleted")
+                            logging.info(f"Redis: {{self.table}} - id: {{id}} deleted")
                         self._clear_read_list_cache()
                 
                     def read_list(self) -> list[dict]:
-                        cache_key: str = f"{self.table}-list"
+                        cache_key: str = f"{{self.table}}-list"
                 
                         cache_val = redis_get(cache_key)
                         if cache_val:
@@ -91,13 +91,14 @@ class RelationalCrudComponent(CoupleWriter):
                 
                     def _clear_read_list_cache(self) -> None:
                         # Changes to the values of the database must invalidate the list
-                        cache_key: str = f"{self.table}-list"
+                        cache_key: str = f"{{self.table}}-list"
                         redis_delete(cache_key)
                 
                     def _get_cache_key(self, id) -> str:
-                        return f"{self.table}-{id}"            
+                        return f"{{self.table}}-{{id}}"            
             """)
         )
+        file_writer.close()
         
 
     def write_test(self, config: dict) -> None:

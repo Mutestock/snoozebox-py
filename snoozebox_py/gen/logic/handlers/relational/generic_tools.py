@@ -5,7 +5,7 @@ import textwrap
 from gen.couple_writer_abstract import CoupleWriter
 
 
-class RelationalCrudComponent(CoupleWriter):
+class GenericRelationalTools(CoupleWriter):
     subject: str = "component"
 
     def write(self, config: dict) -> None:
