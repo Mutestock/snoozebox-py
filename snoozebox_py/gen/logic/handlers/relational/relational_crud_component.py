@@ -1,13 +1,14 @@
 import textwrap
-from gen.couple_writer_abstract import CoupleWriter
+from gen.couple_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_directory
 
 
-class RelationalCrudComponent(CoupleWriter):
+class RelationalCrudComponent(BlockWriter):
     subject: str = "component"
 
     def write(self, config: dict) -> None:
         file_writer = open(
-            f"{config.get('handler_path')}/handler_utils/crud_handler_component.py", "w"
+             f"{get_relative_project_directory}/{config['settings']['file_structure']['handler_utils']}/crud_handler_component.py", "w"
         )
         
         file_writer.write(

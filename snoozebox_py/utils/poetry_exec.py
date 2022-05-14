@@ -1,8 +1,9 @@
 import subprocess
 
+
 def run_poetry(config: dict) -> None:
-    print(config)
-    poetry_new_command = f"poetry new services/{config['project_name']}"
-    subprocess.run(["poetry", "new", f"services/{config['project_name']}"], check=True, text=True)
-    for dependency in config["collected_dependencies"]:
-        subprocess.run(f"poetry add {dependency}")
+    relative_project_path = f"services/{config['project_name']}"
+    subprocess.run(
+        ["poetry", "new", relative_project_path], check=True, text=True
+    )
+    subprocess.run(["poetry", "add"]+config['collected_dependencies'], check=True, text=True, cwd=relative_project_path)

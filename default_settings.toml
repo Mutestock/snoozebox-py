@@ -50,7 +50,14 @@ host="localhost"
 dependencies=["pika"]
 
 [settings.file_structure]
+root_services="services"
+
 connection="connection"
-handlers="logic/handlers"
+logic="logic"
 service="service"
 utils="utils"
+models="models"
+
+routes="service/routes"
+handlers="logic/handlers"
+handler_utils="logic/handler_utils"

@@ -1,12 +1,13 @@
-from gen.couple_writer_abstract import CoupleWriter
+from gen.couple_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_directory
 import textwrap
 
-class RedisConnection(CoupleWriter):
+class RedisConnection(BlockWriter):
     subject: str = "connection"
     
     def write(self, config: dict) -> None:
         file_writer = open(
-            f"{config.get('connection_path')}/redis_connection.py", "w"
+            f"{get_relative_project_directory(config)}/{config['settings']['file_structure']['connection']}/redis_connection.py", "w"
         )
         
         file_writer.write(

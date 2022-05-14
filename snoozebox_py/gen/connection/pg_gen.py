@@ -1,15 +1,18 @@
-from gen.couple_writer_abstract import CoupleWriter
+from gen.couple_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_directory, get_relative_tests_directory
 import textwrap
 
-class PostgresConnection(CoupleWriter):
+
+class PostgresConnection(BlockWriter):
     subject: str = "connection"
-    
+
     def write(self, config: dict):
         file_writer = open(
-            f"{config['file_structure']['connection']}/postgres_connection.py", "w"
+            f"{get_relative_project_directory(config)}/{config['settings']['file_structure']['connection']}/postgres_connection.py",
+            "w",
         )
-        
-        file_writer.writer(
+
+        file_writer.write(
             textwrap.dedent(
                 """\
                     from sqlalchemy import create_engine
@@ -40,13 +43,12 @@ class PostgresConnection(CoupleWriter):
                 """
             )
         )
-        
-    
+
     def write_test(self, config: dict):
         file_writer = open(
-            f"{config.get('test_path')}/test_connection/test_postgres.py", "w"
+            f"{get_relative_tests_directory()}/test_connection/test_postgres.py", "w"
         )
-        
+
         file_writer.write(
             textwrap.dedent(
                 """

@@ -1,13 +1,14 @@
-from gen.couple_writer_abstract import CoupleWriter
+from gen.couple_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_directory
 import textwrap
 
 
-class CassandraConnection(CoupleWriter):
+class CassandraConnection(BlockWriter):
     subject: str = "connection"
 
     def write(self, config: dict) -> None:
         file_writer = open(
-            f"{config.get('connection_path')}/cassandra_connection.py", "w"
+            f"{get_relative_project_directory(config)}/{config['settings']['file_structure']['connection']}/cassandra_connection.py", "w"
         )
 
         file_writer.write(
@@ -61,3 +62,9 @@ class CassandraConnection(CoupleWriter):
             )
         )
         file_writer.close()
+        
+    def docker_compose_write(self, config: dict) -> None:
+        pass
+    
+    def config_write(self, config: dict ) -> None:
+        pass

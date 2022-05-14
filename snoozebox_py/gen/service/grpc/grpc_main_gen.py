@@ -1,8 +1,8 @@
 import textwrap
-from gen.couple_writer_abstract import CoupleWriter
+from gen.couple_writer_abstract import BlockWriter
 
 
-class Grpc(CoupleWriter):
+class Grpc(BlockWriter):
     subject: str = "service"
 
     def write(self, config: dict) -> None:

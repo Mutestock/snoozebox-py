@@ -1,12 +1,13 @@
-from gen.couple_writer_abstract import CoupleWriter
+from gen.couple_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_directory
 import textwrap
 
 
-class MongoConnection(CoupleWriter):
+class MongoConnection(BlockWriter):
     subject: str = "connection"
 
     def write(self, config: dict) -> None:
-        file_writer = open(f"{config.get('connection_path')}/mongo_connection.py")
+        file_writer = open(f"{get_relative_project_directory(config)}/{config['settings']['file_structure']['connection']}//mongo_connection.py")
 
         file_writer.write(
             textwrap.dedent(

@@ -6,6 +6,7 @@ from utils.pathing import (
 
 from snoozefile.snoozefile import generate_snoozefile
 from gen.prompt import run_append_prompt
+from gen.gen_base import exec_gen
 
 
 @click.group()
@@ -28,6 +29,8 @@ def init(data_path):
 def generate():
     pass
 
+
 @manager.command()
 def append():
-    run_append_prompt()
+    config: dict = run_append_prompt()
+    exec_gen(config)
