@@ -6,7 +6,11 @@ from gen.logic.handlers.relational import (
 )
 from gen.service.grpc import grpc_main_gen, grpc_routes_gen
 from utils.poetry_exec import run_poetry
-from utils.pathing import create_directories_if_not_exists, get_relative_project_directory
+from utils.pathing import (
+    create_directories_if_not_exists,
+    get_relative_project_src_directory,
+    get_relative_tests_directory,
+)
 
 
 def exec_gen(config: dict) -> None:
@@ -17,8 +21,18 @@ def exec_gen(config: dict) -> None:
     print("Making required directories...")
     create_directories_if_not_exists(
         [
-            f"{get_relative_project_directory(config)}/{path_def}"
-            for path_def in config["settings"]["file_structure"].values()
+            f"{get_relative_project_src_directory(config)}/{path_def[1]}"
+            for path_def in config["settings"]["file_structure"][
+                "project_directories"
+            ].values()
+        ]
+    )
+    create_directories_if_not_exists(
+        [
+            f"{get_relative_tests_directory(config)}/{path_def[1]}"
+            for path_def in config["settings"]["file_structure"][
+                "test_directories"
+            ].values()
         ]
     )
     print("Writing the specified files...")
@@ -42,7 +56,7 @@ def get_postgres_writers() -> list:
 
 
 def get_grpc_writers() -> list:
-    grpc_writers = [grpc_main_gen.Grpc, grpc_routes_gen]
+    grpc_writers = [grpc_main_gen.Grpc]
     return grpc_writers
 
 

@@ -19,9 +19,17 @@ def create_empty_files_if_not_exists(files: list[str]):
 
 
 # Just to make code more readable elsewhere
-def get_relative_project_directory(config: dict) -> str:
-    return f"{config['settings']['file_structure']['root_services']}/{config['project_name']}/{config['project_name']}"
+def get_relative_project_root_directory(config: dict) -> str:
+    return f"{config['settings']['file_structure']['root_services']}/{config['project_name']}"
+
+
+def get_relative_project_src_directory(config: dict) -> str:
+    return f"{get_relative_project_root_directory(config)}/{config['project_name']}"
 
 
 def get_relative_tests_directory(config: dict) -> str:
-    return f"{config['settings']['file_structure']['root_services']}/{config['project_name']}/tests"
+    return get_relative_project_root_directory(config) + "/tests"
+
+
+def get_relative_generated_config_file(config: dict) -> str:
+    return f"{get_relative_project_root_directory(config)}/{config['settings']['file_structure']['project_files']['config_file']}"

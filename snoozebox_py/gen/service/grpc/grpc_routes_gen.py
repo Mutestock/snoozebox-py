@@ -1,20 +1,29 @@
 import textwrap
-from gen.couple_writer_abstract import BlockWriter
+from gen.block_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_src_directory
 
 
 class GrpcRoutes(BlockWriter):
     def write(self, config: dict) -> None:
+        project_directories: dict = config['settings']['file_structure']['project_directories']
+        handlers: str = project_directories['handlers'][0]
+        routes: str = project_directories['routes'][0]
+        service: str = project_directories['service'][0]
+        protogen: str = project_directories['protogen'][0]
+        logic: str = project_directories['logic'][0]
+        
+        
         for obj in config["objects"]:
             file_writer = open(
-                f"{config['settings']['file_structure']['root_services']}/{config['project_name']}/{config['settings']['file_structure']['routes']}/{obj.name}.py", "w"
+                f"{get_relative_project_src_directory(config)}/{service}/{routes}/{obj.name}.py", "w"
             )
 
             file_writer.write(
                 textwrap.dedent(
                     f"""\
-                    from protogen.{obj.name.lower()}_pb2_grpc import {obj.name.capitalize()}Servicer
-                    from protogen import {obj.name.lower()}_pb2
-                    from logic.handlers.{obj.name.lower()}_handler import {obj.name.capitalize()}Handler
+                    from {protogen}.{obj.name.lower()}_pb2_grpc import {obj.name.capitalize()}Servicer
+                    from {protogen} import {obj.name.lower()}_pb2
+                    from {logic}.{handlers}.{obj.name.lower()}_handler import {obj.name.capitalize()}Handler
                     
                     class {obj.name.capitalize()}Router({obj.name.capitalize()}Servicer):
                         {obj.name.lower()}_handler: {obj.name.capitalize()}Handler = {obj.name.capitalize()}Handler()

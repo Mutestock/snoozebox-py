@@ -1,26 +1,34 @@
 import textwrap
-from gen.couple_writer_abstract import BlockWriter
-from utils.pathing import get_relative_project_directory
+from gen.block_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_src_directory
 
 
 class RelationalCrudComponent(BlockWriter):
     subject: str = "component"
 
     def write(self, config: dict) -> None:
+        project_directories: dict = config['settings']['file_structure']['project_directories']
+        connection: str = project_directories['connection'][0]
+        logic: str = project_directories['logic'][0]
+        handlers: str = project_directories['handlers'][0]
+        handler_utils: str = project_directories['handler_utils'][0]
+        
         file_writer = open(
-             f"{get_relative_project_directory}/{config['settings']['file_structure']['handler_utils']}/crud_handler_component.py", "w"
+             f"{get_relative_project_src_directory(config)}/{logic}/{handlers}/{handler_utils}/crud_handler_component.py", "w"
         )
         
+        
+        
         file_writer.write(
-            textwrap.dedent("""\
+            textwrap.dedent(f"""\
                 import json
                 from sqlalchemy import insert, delete, update, select
-                from connection.pg_connection import exec_stmt
-                from logic.handlers.handler_utils.generic_tools import (
+                from {connection}.pg_connection import exec_stmt
+                from {logic}.{handlers}.{handler_utils}.generic_tools import (
                     prepare_object_for_querying,
                     iter_parse_datetime,
                 )
-                from connection.redis_connection import (
+                from {connection}.redis_connection import (
                     redis_get,
                     redis_set,
                     redis_delete,

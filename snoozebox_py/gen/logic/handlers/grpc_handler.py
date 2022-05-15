@@ -1,33 +1,41 @@
 import textwrap
-from gen.couple_writer_abstract import BlockWriter
-from utils.pathing import get_relative_project_directory
+from gen.block_writer_abstract import BlockWriter
+from utils.pathing import get_relative_project_src_directory
 
 
 class GrpcHandler(BlockWriter):
     subject: str = ""
 
     def write(self, config: dict) -> None:
+        
+        project_directories: dict = config['settings']['file_structure']['project_directories']
+        logic: str = project_directories['logic'][0]
+        handlers: str = project_directories['handlers'][0]
+        handler_utils: str = project_directories['handler_utils'][0]
+        models: str = project_directories['models'][0]
+        protogen: str = project_directories['protogen'][0]
+        
         for obj in config["objects"]:
             file_writer = open(
-                 f"{get_relative_project_directory}/{config['settings']['file_structure']['handlers']}/{obj.name}_handler.py",
+                 f"{get_relative_project_src_directory(config)}/{handlers}/{obj.name}_handler.py",
                 "w",
             )
 
             file_writer.write(
                 textwrap.dedent(
                     f"""\
-                    from logic.handlers.handler_utils.crud_handler_component import (
+                    from {logic}.{handlers}.{handler_utils}.crud_handler_component import (
                         CrudHandlerComponent,
                     )
-                    from logic.handlers.handler_utils.utils_handler_component import (
+                    from {logic}.{handlers}.{handler_utils}.utils_handler_component import (
                         UtilsHandlerComponent,
                     )
-                    from protogen import {obj.name.lower()}_pb2
-                    from logic.handlers.handler_utils.generic_tools import (
+                    from {protogen} import {obj.name.lower()}_pb2
+                    from {logic}.{handlers}.{handler_utils}.generic_tools import (
                         SUCCESFUL_TRANSACTION,
                         make_error_message,
                     )
-                    from models.{obj.name.lower()} import {obj.name.capitalize()}
+                    from {models}.{obj.name.lower()} import {obj.name.capitalize()}
                     from pipe import map
                     import logging
 

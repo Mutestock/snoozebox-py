@@ -1,3 +1,6 @@
+# Delete the 'schematics'
+schematics=[]
+
 [settings]
 general_dependencies=["toml", "pipe", "nose2"]
 [settings.database]
@@ -51,13 +54,25 @@ dependencies=["pika"]
 
 [settings.file_structure]
 root_services="services"
+docker_compose="docker-compose.yml"
 
-connection="connection"
-logic="logic"
-service="service"
-utils="utils"
-models="models"
+[settings.file_structure.project_directories]
+connection=["connection","connection"]
+logic=["logic","logic"]
+service=["service","service"]
+utils=["utils","utils"]
+models=["models","models"]
+routes=["routes","service/routes"]
+handlers=["handlers","logic/handlers"]
+handler_utils=["handler_utils","logic/handlers/handler_utils"]
+protogen=["protogen","protogen"]
 
-routes="service/routes"
-handlers="logic/handlers"
-handler_utils="logic/handler_utils"
+[settings.file_structure.project_files]
+config_file="config.toml"
+
+[settings.file_structure.test_directories]
+test_connection=["test_connection","test_connection"]
+test_logic=["test_logic","test_logic"]
+test_service=["test_service","test_service"]
+
+

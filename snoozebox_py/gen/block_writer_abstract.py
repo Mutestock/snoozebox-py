@@ -1,6 +1,5 @@
 from abc import ABC
 
-
 class BlockWriter(ABC):
     subject: str
 
@@ -16,3 +15,6 @@ class BlockWriter(ABC):
     def config_write(self, config: dict) -> None:
         pass
     
+
+        
+
