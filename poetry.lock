@@ -170,7 +170,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "snoozelib"
-version = "0.1.0b0"
+version = "0.0.0a0"
 description = ""
 category = "main"
 optional = false
@@ -178,7 +178,7 @@ python-versions = ">=3.9,<4.0"
 
 [package.source]
 type = "file"
-url = "snoozelib/dist/snoozelib-0.1.0b0-py3-none-any.whl"
+url = "snoozelib/dist/snoozelib-0.0.0a0-py3-none-any.whl"
 
 [[package]]
 name = "toml"
@@ -215,7 +215,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5b6c72fde432d4b22a77403ceac564f8181ed400d3b41df338580330a86b554a"
+content-hash = "b163d177069d2501147700548bb546b50a1ee3c2d365096744a20374d44cf291"
 
 [metadata.files]
 atomicwrites = [
@@ -300,7 +300,7 @@ pytest = [
     {file = "pytest-5.4.3.tar.gz", hash = "sha256:7979331bfcba207414f5e1263b5a0f8f521d0f457318836a7355531ed1a4c7d8"},
 ]
 snoozelib = [
-    {file = "snoozelib-0.1.0b0-py3-none-any.whl", hash = "sha256:1613bf4f4da47bd9e296be67ce7756d13515b3752e1cc55a02b1ee7e311e65c5"},
+    {file = "snoozelib-0.0.0a0-py3-none-any.whl", hash = "sha256:d246881d6118cfe9102bc28a3da8d1b4d071fb9bd853b63b3b6d8f47d96b2053"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},

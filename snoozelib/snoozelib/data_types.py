@@ -96,19 +96,19 @@ data_types = {
     ],
     "inet": (),
     "integer": [
-        "Column(Integer())", [
+        "Column(Integer)", [
             ImportInstruction("sqlalchemy", "Integer"),
             ImportInstruction("sqlalchemy", "Column")
         ]
     ],
     "int": [
-        "Column(Integer())", [
+        "Column(Integer)", [
             ImportInstruction("sqlalchemy", "Integer"),
             ImportInstruction("sqlalchemy", "Column")
         ]
     ],
     "int4": [
-        "Column(Integer())", [
+        "Column(Integer)", [
             ImportInstruction("sqlalchemy", "Integer"),
             ImportInstruction("sqlalchemy", "Column")
         ]
@@ -144,7 +144,12 @@ data_types = {
     "int2": (),
     "smallserial": (),
     "serial2": (),
-    "serial": (),
+    "serial": [
+        "Column(Integer, primary_key=True, autoincrement=True)", [
+            ImportInstruction("sqlalchemy", "Integer"),
+            ImportInstruction("sqlalchemy", "Column")
+        ]
+    ],
     "serial4": (),
     "text": (),
     "time without time zone": [

@@ -1,5 +1,12 @@
-from snoozelib import __version__
+from snoozelib import sql_tables_to_classes
 
 
 def test_version():
-    assert __version__ == '0.1.0'
+    sql: str = f"""
+    CREATE TABLE whatevs IF NOT EXISTS(
+        id SERIAL NOT NULL,
+        stuff VARCHAR(255) NOT NULL
+    );
+    """
+    stuff = sql_tables_to_classes(sql)
+    print(stuff)
