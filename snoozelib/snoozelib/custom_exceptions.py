@@ -3,3 +3,6 @@ class MultipleDataTypesError(Exception):
 
 class NoSqlDataTypeError(Exception):
     pass
+
+class MissingExpectedValue(Exception):
+    pass

@@ -9,6 +9,7 @@ python = "^3.9"
 click = "^8.1.2"
 pipe = "^1.6.0"
 toml = "^0.10.2"
+snoozelib = {path = "snoozelib/dist/snoozelib-0.1.0b0-py3-none-any.whl"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
