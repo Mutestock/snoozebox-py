@@ -32,17 +32,20 @@ def _get_data_type(sql: str) -> str:
     for data_type in data_types.keys():
         dtype_mod: str = data_type
         if "(n)" in dtype_mod:
-            # N won't be in the actual sql, but we want the indicator that n exists later on
-            dtype_mod = data_type.replace(data_type, "(n)")
-        if dtype_mod in sql:
-            if not hit_val:
-                hit_val = dtype_mod
-                if dtype_mod != data_type:
-                    hit_val += "(n)"
-            else:
-                raise MultipleDataTypesError(
-                    f"sql contained both {hit_val} and {data_type}"
-                )
+            dtype_mod = data_type.replace(("(n)"), "")
+        for word in sql.split():
+            if "(" in word and ")" in word:
+                only_numbers = _get_only_numbers(sql, data_type)
+                word = word.replace(only_numbers, "n")
+            if data_type == word:
+                if not hit_val:
+                    hit_val = data_type
+                    # if dtype_mod != data_type:
+                    #    hit_val += "(n)"
+                else:
+                    raise MultipleDataTypesError(
+                        f"sql contained both {hit_val} and {data_type}"
+                    )
     if not hit_val:
         raise NoSqlDataTypeError(f"No sql data type found in {sql}")
     else:
@@ -59,12 +62,17 @@ def _check_nullable(sql: str, code: str) -> str:
         return code
 
 
+def _get_only_numbers(sql: str, data_type: str) -> str:
+    only_post_data_type: str = re.sub(rf"^.+?(?={data_type})", "", sql)
+    contents_inside_brackets: str = re.findall(r"\([^)]*\)", only_post_data_type)[0]
+    only_numbers: str = "".join(re.findall(r"\d", contents_inside_brackets))
+    return only_numbers
+
+
 def _check_n_value(sql: str, code: str, data_type: str) -> str:
 
     if "(n)" in code:
-        only_post_data_type: str = re.sub(rf"^.+?(?={data_type})", "", sql)
-        contents_inside_brackets: str = re.findall(r"\([^)]*\)", only_post_data_type)[0]
-        only_numbers: str = "".join(re.findall(r"\d", contents_inside_brackets))
+        only_numbers: str = _get_only_numbers(sql, data_type)
         if not only_numbers:
             raise MissingExpectedValue("No numbers were found post _check_n_value")
         return code.replace("(n)", only_numbers)
@@ -72,20 +80,28 @@ def _check_n_value(sql: str, code: str, data_type: str) -> str:
         return code
 
 
+def _rinse_pre_class_def(sql: str) -> str:
+    everything_after_first_bracket = re.sub(r"^.+?(?=\()", "", sql)
+    return everything_after_first_bracket
+
+
 def _make_class_def(sql: str) -> Conversion:
     object_name: str = (
         re.sub(r"^.+?(?=create table)", "", sql).replace("create table", "").split()[0]
     )
-    variables: List[str] = sql.split(",")
+    variables: List[str] = _rinse_pre_class_def(sql).split(",")
     conversion = Conversion(name=object_name)
     for sql_line in variables:
+        if not sql_line:
+            continue
+        sql_line = re.sub(r"[;\n]", "", sql_line)
         data_type: str = _get_data_type(sql_line)
         related_data = data_types[data_type]
         conversion.concatenate_dependencies(related_data[1])
 
         code: str = related_data[0]
         code = _check_nullable(sql_line, code)
-        code = _check_n_value(sql, code, data_type)
+        code = _check_n_value(sql_line, code, data_type)
         if not conversion.contents:
             conversion.contents = code
         else:
