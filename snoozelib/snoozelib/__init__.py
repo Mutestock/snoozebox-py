@@ -7,7 +7,6 @@ from snoozelib.custom_exceptions import (
     NoSqlDataTypeError,
 )
 from snoozelib.conversion import Conversion
-from snoozelib.import_instruction import ImportInstruction
 
 
 def sql_tables_to_classes(sql: str) -> List[Conversion]:
@@ -20,7 +19,8 @@ def sql_tables_to_classes(sql: str) -> List[Conversion]:
         for statement in statements
         if "create table" in statement
     ]
-    return [_make_class_def(statement) for statement in statements]
+    statements = [_make_class_def(statement) for statement in statements]
+    return statements
 
 
 def _filter_unnecessary_keywords(sql: str):
@@ -40,8 +40,6 @@ def _get_data_type(sql: str) -> str:
             if data_type == word:
                 if not hit_val:
                     hit_val = data_type
-                    # if dtype_mod != data_type:
-                    #    hit_val += "(n)"
                 else:
                     raise MultipleDataTypesError(
                         f"sql contained both {hit_val} and {data_type}"
@@ -75,7 +73,7 @@ def _check_n_value(sql: str, code: str, data_type: str) -> str:
         only_numbers: str = _get_only_numbers(sql, data_type)
         if not only_numbers:
             raise MissingExpectedValue("No numbers were found post _check_n_value")
-        return code.replace("(n)", only_numbers)
+        return code.replace("(n)", "(" + only_numbers + ")")
     else:
         return code
 
@@ -88,7 +86,7 @@ def _rinse_pre_class_def(sql: str) -> str:
 def _make_class_def(sql: str) -> Conversion:
     object_name: str = (
         re.sub(r"^.+?(?=create table)", "", sql).replace("create table", "").split()[0]
-    )
+    ).replace("(", "")
     variables: List[str] = _rinse_pre_class_def(sql).split(",")
     conversion = Conversion(name=object_name)
     for sql_line in variables:
@@ -102,8 +100,15 @@ def _make_class_def(sql: str) -> Conversion:
         code: str = related_data[0]
         code = _check_nullable(sql_line, code)
         code = _check_n_value(sql_line, code, data_type)
+        var_name = sql_line.replace("(", "").replace(")", "").lstrip().split()[0]
+        code = f"{var_name} = {code}\n"
+        print(code)
+        if not conversion.variable_names:
+            conversion.variable_names = []
+        conversion.variable_names.append(var_name)
         if not conversion.contents:
             conversion.contents = code
         else:
             conversion.contents += code
+    conversion.resolve_contents()
     return conversion

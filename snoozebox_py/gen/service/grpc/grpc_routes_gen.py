@@ -13,82 +13,82 @@ class GrpcRoutes(BlockWriter):
         logic: str = project_directories['logic'][0]
         
         
-        for obj in config["objects"]:
+        for schematic in config["schematics"]:
             file_writer = open(
-                f"{get_relative_project_src_directory(config)}/{service}/{routes}/{obj.name}.py", "w"
+                f"{get_relative_project_src_directory(config)}/{service}/{routes}/{schematic.name}.py", "w"
             )
 
             file_writer.write(
                 textwrap.dedent(
                     f"""\
-                    from {protogen}.{obj.name.lower()}_pb2_grpc import {obj.name.capitalize()}Servicer
-                    from {protogen} import {obj.name.lower()}_pb2
-                    from {logic}.{handlers}.{obj.name.lower()}_handler import {obj.name.capitalize()}Handler
+                    from {protogen}.{schematic.name.lower()}_pb2_grpc import {schematic.name.capitalize()}Servicer
+                    from {protogen} import {schematic.name.lower()}_pb2
+                    from {logic}.{handlers}.{schematic.name.lower()}_handler import {schematic.name.capitalize()}Handler
                     
-                    class {obj.name.capitalize()}Router({obj.name.capitalize()}Servicer):
-                        {obj.name.lower()}_handler: {obj.name.capitalize()}Handler = {obj.name.capitalize()}Handler()
+                    class {schematic.name.capitalize()}Router({schematic.name.capitalize()}Servicer):
+                        {schematic.name.lower()}_handler: {schematic.name.capitalize()}Handler = {schematic.name.capitalize()}Handler()
                     
                 """
                 )
             )
 
-            if "create" in obj['crud_instructions']:
+            if "create" in schematic['crud_instructions']:
                 file_writer.write(
                     textwrap.dedent(
                         f"""\
-                        def Create{obj.name.capitalize()}(
-                            self, request: {obj.name.lower()}_pb2.Create{obj.name.capitalize()}Request, _
-                        ) -> {obj.name.lower()}_pb2.Create{obj.name.capitalize()}Response:
-                            return self.{obj.name.lower()}_handler.create(request)      
+                        def Create{schematic.name.capitalize()}(
+                            self, request: {schematic.name.lower()}_pb2.Create{schematic.name.capitalize()}Request, _
+                        ) -> {schematic.name.lower()}_pb2.Create{schematic.name.capitalize()}Response:
+                            return self.{schematic.name.lower()}_handler.create(request)      
                                   
                     """
                     )
                 )
 
-            elif "read" in obj['crud_instructions']:
+            elif "read" in schematic['crud_instructions']:
                 file_writer.write(
                     textwrap.dedent(
                         f"""\
-                        def Read{obj.name.capitalize()}(
-                            self, request: {obj.name.lower()}_pb2.Read{obj.name.capitalize()}Request, _
-                        ) -> {obj.name.lower()}_pb2.Read{obj.name.capitalize()}Response:
-                            return self.{obj.name.lower()}_handler.read(request)
+                        def Read{schematic.name.capitalize()}(
+                            self, request: {schematic.name.lower()}_pb2.Read{schematic.name.capitalize()}Request, _
+                        ) -> {schematic.name.lower()}_pb2.Read{schematic.name.capitalize()}Response:
+                            return self.{schematic.name.lower()}_handler.read(request)
 
                     """
                     )
                 )
-            elif "update" in obj['crud_instructions']:
+            elif "update" in schematic['crud_instructions']:
                 file_writer.write(
                     textwrap.dedent(
                         f"""\
-                        def Update{obj.name.capitalize()}(
-                            self, request: {obj.name.lower()}_pb2.Update{obj.name.capitalize()}Request, _
-                        ) -> {obj.name.lower()}_pb2.Update{obj.name.capitalize()}Response:
-                            return self.{obj.name.lower()}_handler.update(request)
+                        def Update{schematic.name.capitalize()}(
+                            self, request: {schematic.name.lower()}_pb2.Update{schematic.name.capitalize()}Request, _
+                        ) -> {schematic.name.lower()}_pb2.Update{schematic.name.capitalize()}Response:
+                            return self.{schematic.name.lower()}_handler.update(request)
                                   
                     """
                     )
                 )
-            elif "delete" in obj['crud_instructions']:
+            elif "delete" in schematic['crud_instructions']:
                 file_writer.write(
                     textwrap.dedent(
                         f"""\
-                        def Delete{obj.name.capitalize()}(
-                            self, request: {obj.name.lower()}_pb2.Delete{obj.name.capitalize()}Request, _
-                        ) -> {obj.name.lower()}_pb2.Delete{obj.name.capitalize()}Request:
-                            return self.{obj.name.lower()}_handler.delete(request)
+                        def Delete{schematic.name.capitalize()}(
+                            self, request: {schematic.name.lower()}_pb2.Delete{schematic.name.capitalize()}Request, _
+                        ) -> {schematic.name.lower()}_pb2.Delete{schematic.name.capitalize()}Request:
+                            return self.{schematic.name.lower()}_handler.delete(request)
     
                     """
                     )
                 )
-            elif "read_list" in obj['crud_instructions']:
+            elif "read_list" in schematic['crud_instructions']:
                 file_writer.write(
                     textwrap.dedent(
                         f"""\   
-                        def Read{obj.name.capitalize()}List(
-                            self, request: {obj.name.lower()}_pb2.Read{obj.name.capitalize()}ListRequest, _
-                        ) -> {obj.name.lower()}_pb2.Read{obj.name.capitalize()}ListRequest:
-                            return self.{obj.name.lower()}_handler.read_list(request)
+                        def Read{schematic.name.capitalize()}List(
+                            self, request: {schematic.name.lower()}_pb2.Read{schematic.name.capitalize()}ListRequest, _
+                        ) -> {schematic.name.lower()}_pb2.Read{schematic.name.capitalize()}ListRequest:
+                            return self.{schematic.name.lower()}_handler.read_list(request)
 
                     """
                     )

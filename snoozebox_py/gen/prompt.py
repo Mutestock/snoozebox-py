@@ -1,8 +1,12 @@
-DATABASE_OPTIONS: dict = {"1": "Postgres", "2": "MongoDB", "3": "Cassandra"}
-SERVICE_OPTIONS: dict = {"1": "Rest", "2": "gRPC", "3": "Kafka", "4": "RabbitMQ"}
 from gen import gen_base
 from utils.config import CONFIG
 import sys
+from utils.pathing import (
+    get_directories_with_sql_files,
+    get_parent_of_root_services,
+)
+DATABASE_OPTIONS: dict = {"1": "Postgres", "2": "MongoDB", "3": "Cassandra"}
+SERVICE_OPTIONS: dict = {"1": "Rest", "2": "gRPC", "3": "Kafka", "4": "RabbitMQ"}
 
 def run_append_prompt(config: dict = None) -> dict:
     if not config:
@@ -16,6 +20,14 @@ def run_append_prompt(config: dict = None) -> dict:
     _database_prompt(config)
     _service_prompt(config)
     config.update(CONFIG)
+    print("Grabbing schematics...")
+    schematics = _grab_schematics(config)
+    print("These are the directories in the schematics directory")
+    print("Select one")
+    for key in schematics.keys():
+        print(key)
+    selected_schematic = input()
+    
     return config
     
 
@@ -62,3 +74,14 @@ def _manage_selection(
     else:
         config[subject] = options.get(selection)
         return config
+
+
+
+def _grab_schematics(config: dict) -> dict:
+    sql_dict = get_directories_with_sql_files(
+        f"{get_parent_of_root_services(config)}/schematics"
+    )
+    if not sql_dict:
+        print("No schematics found during execution")
+        sys.exit("Aborting due to missing schematics...")
+    return sql_dict

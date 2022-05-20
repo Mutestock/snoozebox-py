@@ -1,5 +1,7 @@
 import os
+from typing import List
 from pipe import select
+from pathlib import Path
 
 
 def create_directories_if_not_exists(directories: list[str]):
@@ -33,3 +35,32 @@ def get_relative_tests_directory(config: dict) -> str:
 
 def get_relative_generated_config_file(config: dict) -> str:
     return f"{get_relative_project_root_directory(config)}/{config['settings']['file_structure']['project_files']['config_file']}"
+
+
+def get_parent_of_root_services(config: dict) -> str:
+    parent = Path(
+        config["settings"]["file_structure"]["root_services"]
+    ).parent.absolute()
+    return parent
+
+
+def get_directories_with_sql_files(path_str: str) -> dict:
+    directories_with_sql: dict = {}
+
+    for item in Path(path_str).iterdir():
+        if item.is_dir():
+            for nested_item in item.iterdir():
+                if not nested_item.is_file():
+                    continue
+                if (
+                    ".sql" in str(nested_item)
+                    or ".json" in str(nested_item)
+                    or ".cql" in str(nested_item)
+                ):
+                    if not directories_with_sql.get(str(item)):
+                        directories_with_sql[str(item)] = []
+                    directories = directories_with_sql[str(item)]
+                    directories.append(str(nested_item))
+                    directories_with_sql[str(item)] = directories
+
+    return directories_with_sql

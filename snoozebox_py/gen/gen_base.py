@@ -5,17 +5,22 @@ from gen.logic.handlers.relational import (
     relational_utils_component,
 )
 from gen.service.grpc import grpc_main_gen, grpc_routes_gen
+from gen.model.postgres_model import PostgresModelWriter
 from utils.poetry_exec import run_poetry
 from utils.pathing import (
     create_directories_if_not_exists,
     get_relative_project_src_directory,
     get_relative_tests_directory,
 )
+from snoozelib import sql_tables_to_classes
+import sys
 
 
 def exec_gen(config: dict) -> None:
     writers: list = _populate_generation_writers(config)
     _collect_dependencies(config)
+
+
     print("Running Poetry...")
     run_poetry(config)
     print("Making required directories...")
@@ -45,18 +50,22 @@ def exec_gen(config: dict) -> None:
     print("Ok")
 
 
+    
+
+
 def get_postgres_writers() -> list:
     postgres_writers = [
         pg_gen.PostgresConnection,
         generic_tools.GenericRelationalTools,
         relational_crud_component.RelationalCrudComponent,
         relational_utils_component.RelationalUtilsComponent,
+        PostgresModelWriter,
     ]
     return postgres_writers
 
 
 def get_grpc_writers() -> list:
-    grpc_writers = [grpc_main_gen.Grpc]
+    grpc_writers = [grpc_main_gen.Grpc, grpc_routes_gen.GrpcRoutes]
     return grpc_writers
 
 
