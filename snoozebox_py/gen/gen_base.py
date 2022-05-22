@@ -6,6 +6,7 @@ from gen.logic.handlers.relational import (
 )
 from gen.service.grpc import grpc_main_gen, grpc_routes_gen
 from gen.model.postgres_model import PostgresModelWriter
+from gen.protogen import ProtogenWriter
 from utils.poetry_exec import run_poetry
 from utils.pathing import (
     create_directories_if_not_exists,
@@ -50,9 +51,6 @@ def exec_gen(config: dict) -> None:
     print("Ok")
 
 
-    
-
-
 def get_postgres_writers() -> list:
     postgres_writers = [
         pg_gen.PostgresConnection,
@@ -65,7 +63,7 @@ def get_postgres_writers() -> list:
 
 
 def get_grpc_writers() -> list:
-    grpc_writers = [grpc_main_gen.Grpc, grpc_routes_gen.GrpcRoutes]
+    grpc_writers = [grpc_main_gen.Grpc, grpc_routes_gen.GrpcRoutes, ProtogenWriter]
     return grpc_writers
 
 

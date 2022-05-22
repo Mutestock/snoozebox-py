@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from snoozelib.import_instruction import ImportInstruction
+from snoozelib.grpc_variable import GrpcVariable
 import textwrap
 
 
@@ -10,6 +11,7 @@ class Conversion:
     contents: Optional[str] = None
     import_instructions: Optional[List[ImportInstruction]] = None
     variable_names: Optional[str] = None
+    grpc_variables: Optional[GrpcVariable] = None
 
     def resolve_contents(self) -> str:
         res: str = ""

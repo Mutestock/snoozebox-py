@@ -7,6 +7,7 @@ from snoozelib.custom_exceptions import (
     NoSqlDataTypeError,
 )
 from snoozelib.conversion import Conversion
+from snoozelib.grpc_variable import GrpcVariable
 
 
 def sql_tables_to_classes(sql: str) -> List[Conversion]:
@@ -93,6 +94,36 @@ def _rinse_pre_class_def(sql: str) -> str:
     return everything_after_first_bracket
 
 
+def _determine_type_for_grpc(sql_line: str) -> str:
+    dtype = _get_data_type(sql_line)
+    if dtype in [
+        "bigint",
+        "int8",
+        "bigserial",
+        "serial8",
+        "bit",
+        "bit_varying",
+        "bytea",
+        "double precision",
+        "float8",
+        "integer",
+        "int",
+        "int4",
+        "real",
+        "float4",
+        "smallint",
+        "int2",
+        "smallserial",
+        "serial2",
+        "serial",
+        "serial4",
+    ]:
+        return "int32"
+    elif dtype in ["bool", "boolean"]:
+        return "bool"
+    else:
+        return "str"
+
 def _make_class_def(sql: str) -> Conversion:
     object_name: str = (
         re.sub(r"^.+?(?=create table)", "", sql).replace("create table", "").split()[0]
@@ -113,7 +144,11 @@ def _make_class_def(sql: str) -> Conversion:
         code = _check_n_value(sql_line, code, data_type)
         var_name = sql_line.replace("(", "").replace(")", "").lstrip().split()[0]
         code = f"{var_name} = {code}\n"
-        print(code)
+        if not conversion.grpc_variables:
+            conversion.grpc_variables = []
+        conversion.grpc_variables.append(
+            GrpcVariable(var_name=var_name, var_type=_determine_type_for_grpc(sql_line), default="default" in sql_line)
+        )
         if not conversion.variable_names:
             conversion.variable_names = []
         conversion.variable_names.append(var_name)
