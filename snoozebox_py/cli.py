@@ -1,3 +1,5 @@
+from pathlib import Path
+import sys
 from typing import List
 import os
 import click
@@ -63,6 +65,8 @@ def describe_sql(path, translate):
     """
     if not path:
         path = os.getcwd()
+    if not Path(path).is_dir():
+        sys.exit("Path is not a directory. Please point to the schematics directory.")
     directories = get_directories_with_sql_files(path)
     print(directories)
     if translate:
