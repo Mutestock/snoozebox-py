@@ -50,14 +50,24 @@ def _get_data_type(sql: str) -> str:
         return hit_val
 
 
-def _check_nullable(sql: str, code: str) -> str:
-    if "not null" in sql:
+def _check_keyword(sql: str, code: str, keyword: str, to_add: str) -> str:
+    if keyword in sql:
         # Last symbol is assumed to be a parenthesis on Column(Something(), nullable=False -->)<--
         all_but_last_symbol: str = code[:-1]
-        all_but_last_symbol += ", nullable=False)"
+        all_but_last_symbol += to_add
         return all_but_last_symbol
     else:
         return code
+
+
+def _check_nullable(sql: str, code: str) -> str:
+    return _check_keyword(
+        sql=sql, code=code, keyword="not null", to_add=", nullable=False)"
+    )
+
+
+def _check_unique(sql: str, code: str) -> str:
+    return _check_keyword(sql=sql, code=code, keyword="unique", to_add=", unique=True)")
 
 
 def _get_only_numbers(sql: str, data_type: str) -> str:
@@ -99,6 +109,7 @@ def _make_class_def(sql: str) -> Conversion:
 
         code: str = related_data[0]
         code = _check_nullable(sql_line, code)
+        code = _check_unique(sql_line, code)
         code = _check_n_value(sql_line, code, data_type)
         var_name = sql_line.replace("(", "").replace(")", "").lstrip().split()[0]
         code = f"{var_name} = {code}\n"

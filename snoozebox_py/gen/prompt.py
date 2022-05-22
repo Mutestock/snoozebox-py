@@ -32,7 +32,7 @@ def run_append_prompt(config: dict = None) -> dict:
         config["schematics_directory"]
         | select(lambda x: sql_tables_to_classes(open(x, "r").read()))
     )
-    print(config)
+    print(config["schematics"])
 
     return config
 

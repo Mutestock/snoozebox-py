@@ -17,7 +17,7 @@ class Grpc(BlockWriter):
         schematics: str = config["schematics"]
 
         file_writer = open(
-            f"{get_relative_project_src_directory(config)}/{service}/grpc.py", "w"
+            f"{get_relative_project_src_directory(config)}/{service}/grpc_main.py", "w"
         )
 
         file_writer.write(
@@ -30,28 +30,30 @@ class Grpc(BlockWriter):
                 """
             )
         )
-
-        for schematic in schematics:
-            file_writer.write(
-                textwrap.dedent(
-                    f"""\
-                from {protogen}.{schematic.lower()}_pb2_grpc import add_{schematic.capitalize()}Servicer_to_server                                                                
-                """
+        for schematic_file in schematics:
+            for schematic in schematic_file:
+                file_writer.write(
+                    textwrap.dedent(
+                        f"""\
+                    from {protogen}.{schematic.name.lower()}_pb2_grpc import add_{schematic.name.capitalize()}Servicer_to_server                                                                
+                    """
+                    )
                 )
-            )
 
-        for schematic in schematics:
-            file_writer.write(
-                textwrap.dedent(
-                    f"""\
-                from {service}.grpc.routes.{schematic}_routes import {schematic.capitalize()}Router
-                """
+        for schematic_file in schematics:
+            for schematic in schematic_file:
+                file_writer.write(
+                    textwrap.dedent(
+                        f"""\
+                    from {service}.grpc.routes.{schematic.name.lower()}_routes import {schematic.name.capitalize()}Router
+                    """
+                    )
                 )
-            )
 
         file_writer.write(
             textwrap.dedent(
                 f"""\
+                    \n
             def run_grpc() -> None:
                 uri = f"{{CONFIG['grpc']['host']}}:{{CONFIG['grpc']['port']}}"
                 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -60,20 +62,19 @@ class Grpc(BlockWriter):
             )
         )
 
-        for schematic in schematics:
-            file_writer.write(
-                f"""\
-                add_{schematic}Servicer_to_server(AudioRouter(), server)
-                """
-            )
+        for schematic_file in schematics:
+            for schematic in schematic_file:
+                file_writer.write(
+                    f"\tadd_{schematic.name.capitalize()}Servicer_to_server(AudioRouter(), server)\n"
+                )
 
         file_writer.write(
             textwrap.dedent(
                 f"""\
-                server.add_insecure_port(uri)
-                server.start()
-                server.wait_for_termination()
-            """
+                \tserver.add_insecure_port(uri)
+                    server.start()
+                    server.wait_for_termination()\n
+                """
             )
         )
 
