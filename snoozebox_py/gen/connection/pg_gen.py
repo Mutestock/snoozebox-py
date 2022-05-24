@@ -106,6 +106,7 @@ class PostgresConnection(BlockWriter):
                   - ./data/postgres:/var/lib/postgresql/data
                 networks:
                   - {config["settings"]["docker_compose_network"]}
+                  
         """,
             file_writer=file_writer,
         ),
@@ -113,7 +114,6 @@ class PostgresConnection(BlockWriter):
         indent_writer(
             lvl=2,
             text=f"""
-            
             {config['project_name']}_test_postgres:
                 container_name: {config['project_name']}_test_postgres
                 image: postgres:latest
@@ -129,6 +129,7 @@ class PostgresConnection(BlockWriter):
                   - ./data/postgres_test:/var/lib/postgresql/data
                 networks:
                   - {config["settings"]["docker_compose_network"]}
+                  
         """,
             file_writer=file_writer,
         )

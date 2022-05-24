@@ -8,7 +8,7 @@ from gen.logic.handlers.relational import (
 from gen.logic.handlers.grpc_handler import GrpcHandler
 from gen.service.grpc import grpc_main_gen, grpc_routes_gen
 from gen.model.postgres_model import PostgresModelWriter
-from gen.protogen import ProtogenWriter
+from gen.protogen import ProtogenWriter, run_protogen
 from utils.poetry_exec import run_poetry
 from utils.pathing import (
     create_directories_if_not_exists,
@@ -17,7 +17,7 @@ from utils.pathing import (
 )
 from gen.config_gen import ConfigWriter
 from gen.connection.redis_gen import RedisConnection
-from gen.docker_gen import initial_docker_compose_check
+from gen.docker_gen import final_docker_compose_check, initial_docker_compose_check
 
 
 def exec_gen(config: dict) -> None:
@@ -50,9 +50,10 @@ def exec_gen(config: dict) -> None:
     for writer in writers:
         instantiated = writer()
         instantiated.write_all(config)
-    touch_docker(config)
-    touch_misc(config)
     ConfigWriter.final_conf_toml_gen(config)
+    final_docker_compose_check(config)
+    print("Running protogen...")
+    run_protogen(config)
     print("Ok")
 
 
@@ -77,14 +78,6 @@ def get_grpc_writers() -> list:
 
 def get_generic_writers() -> List:
     return [ConfigWriter, RedisConnection]
-
-
-def touch_docker(config: dict) -> None:
-    print("Touch docker placeholder")
-
-
-def touch_misc(config: dict) -> None:
-    print("Touch misc placeholder")
 
 
 def _populate_generation_writers(config: dict) -> list:
@@ -132,7 +125,7 @@ def _populate_generation_writers(config: dict) -> list:
         ()
     else:
         print("Chosen service wasn't found. This should never happen")
-    #writers += get_generic_writers()
+    writers += get_generic_writers()
 
     return writers
 

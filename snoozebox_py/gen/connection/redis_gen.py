@@ -1,6 +1,6 @@
 from gen.block_writer_abstract import BlockWriter
 from utils.pathing import (
-    get_relative_project_root_directory,
+    get_relative_project_src_directory,
     get_relative_tests_directory,
 )
 from utils.pathing import indent_writer
@@ -18,8 +18,8 @@ class RedisConnection(BlockWriter):
         utils: str = project_directories["utils"][0]
 
         file_writer = open(
-            f"{get_relative_project_root_directory(config)}/{connection}/redis_connection.py",
-            "w+",
+            f"{get_relative_project_src_directory(config)}/{connection}/redis_connection.py",
+            "w",
         )
 
         indent_writer(
@@ -113,7 +113,8 @@ class RedisConnection(BlockWriter):
               volumes:
                 - ./data/redis:/data 
               networks:
-                - {config["settings"]["docker_compose_network"]}   
+                - {config["settings"]["docker_compose_network"]}
+                   
         """,
             file_writer=file_writer,
         )

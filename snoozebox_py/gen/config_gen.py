@@ -21,7 +21,7 @@ class ConfigWriter(BlockWriter):
             "config_file"
         ]
         file_writer = open(
-            f"{get_relative_project_src_directory(config)}/{utils}/config.py"
+            f"{get_relative_project_src_directory(config)}/{utils}/config.py", "w"
         )
 
         indent_writer(
