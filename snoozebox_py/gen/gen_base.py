@@ -1,9 +1,11 @@
-from gen.connection import pg_gen, cassandra_gen, mongo_gen, redis_gen
+from typing import List
+from gen.connection import pg_gen, cassandra_gen, mongo_gen
 from gen.logic.handlers.relational import (
     generic_tools,
     relational_crud_component,
     relational_utils_component,
 )
+from gen.logic.handlers.grpc_handler import GrpcHandler
 from gen.service.grpc import grpc_main_gen, grpc_routes_gen
 from gen.model.postgres_model import PostgresModelWriter
 from gen.protogen import ProtogenWriter
@@ -13,14 +15,14 @@ from utils.pathing import (
     get_relative_project_src_directory,
     get_relative_tests_directory,
 )
-from snoozelib import sql_tables_to_classes
-import sys
+from gen.config_gen import ConfigWriter
+from gen.connection.redis_gen import RedisConnection
+from gen.docker_gen import initial_docker_compose_check
 
 
 def exec_gen(config: dict) -> None:
     writers: list = _populate_generation_writers(config)
     _collect_dependencies(config)
-
 
     print("Running Poetry...")
     run_poetry(config)
@@ -42,29 +44,42 @@ def exec_gen(config: dict) -> None:
         ]
     )
     print("Writing the specified files...")
+    ConfigWriter.initial_conf_push(config)
+    initial_docker_compose_check(config)
+    
     for writer in writers:
         instantiated = writer()
         instantiated.write(config)
         instantiated.write_test(config)
+        instantiated.write_config(config)
+        instantiated.write_docker_compose(config)
     touch_docker(config)
     touch_misc(config)
+    ConfigWriter.final_conf_toml_gen(config)
     print("Ok")
 
 
 def get_postgres_writers() -> list:
-    postgres_writers = [
+    return [
         pg_gen.PostgresConnection,
         generic_tools.GenericRelationalTools,
         relational_crud_component.RelationalCrudComponent,
         relational_utils_component.RelationalUtilsComponent,
         PostgresModelWriter,
     ]
-    return postgres_writers
 
 
 def get_grpc_writers() -> list:
-    grpc_writers = [grpc_main_gen.Grpc, grpc_routes_gen.GrpcRoutes, ProtogenWriter]
-    return grpc_writers
+    return [
+        grpc_main_gen.Grpc,
+        grpc_routes_gen.GrpcRoutes,
+        ProtogenWriter,
+        GrpcHandler,
+    ]
+
+
+def get_generic_writers() -> List:
+    return [ConfigWriter, RedisConnection]
 
 
 def touch_docker(config: dict) -> None:

@@ -1,5 +1,5 @@
 import os
-import toml
+import rtoml
 
 _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT_DIR = os.path.dirname(_ROOT_DIR)
@@ -14,5 +14,5 @@ for toml_file in [DEFAULT_SETTINGS_PATH]:
     with open(toml_file, "r") as file_reader:
         content = file_reader.read()
         if content:
-            CONFIG.update(toml.loads(content))
+            CONFIG.update(rtoml.loads(content))
         

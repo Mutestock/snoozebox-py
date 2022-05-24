@@ -9,10 +9,10 @@ class BlockWriter(ABC):
     def write_test(self, config: dict) -> None:
         pass
 
-    def docker_compose_write(self, config: dict) -> None:
+    def write_docker_compose(self, config: dict) -> None:
         pass
     
-    def config_write(self, config: dict) -> None:
+    def write_config(self, config: dict) -> None:
         pass
     
 

@@ -2,6 +2,7 @@ import os
 from typing import List
 from pipe import select
 from pathlib import Path
+import textwrap
 
 
 def create_directories_if_not_exists(directories: list[str]):
@@ -64,3 +65,10 @@ def get_directories_with_sql_files(path_str: str) -> dict:
                     directories_with_sql[str(item)] = directories
 
     return directories_with_sql
+
+
+def indent_writer(lvl: int, text: str, file_writer) -> None:
+    indent_concat = ""
+    for _ in range(lvl):
+        indent_concat += " "
+    file_writer.write(textwrap.indent(text=textwrap.dedent(text), prefix=indent_concat))

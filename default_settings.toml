@@ -3,6 +3,9 @@ schematics=[]
 
 [settings]
 general_dependencies=["toml", "pipe", "nose2"]
+# Environment variable which determines how the program will be executed
+test_environment_variable_name="SNOOZE_TEST_MODE"
+docker_compose_network="snooze-net"
 [settings.database]
 [settings.database.redis]
 host="localhost"
@@ -70,6 +73,7 @@ protogen=["protogen","protogen"]
 [settings.file_structure.project_files]
 config_file="config.toml"
 protogen_file="protogen.sh"
+
 
 [settings.file_structure.test_directories]
 test_connection=["test_connection","test_connection"]

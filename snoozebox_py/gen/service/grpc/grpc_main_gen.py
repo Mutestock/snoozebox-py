@@ -1,6 +1,8 @@
 import textwrap
 from gen.block_writer_abstract import BlockWriter
+from gen.config_gen import dict_recurse_define
 from utils.pathing import get_relative_project_src_directory
+from pipe import select
 
 
 class Grpc(BlockWriter):
@@ -80,3 +82,13 @@ class Grpc(BlockWriter):
 
     def write_test(self, config: dict) -> None:
         pass
+
+    def write_config(self, config: dict) -> None:
+        def mode_write(config: dict, mode: str) -> None:
+            dict_recurse_define(config, ["relative_config_toml", mode, "grpc"])
+            config["relative_config_toml"][mode]["grpc"]["host"] = config["settings"]["server"]["grpc"]["host"]
+            config["relative_config_toml"][mode]["grpc"]["port"] = config["settings"]["server"]["grpc"]["port"]
+        
+        list(["local", "test"] | select(lambda x: mode_write(config, x)))
+        
+            

@@ -17,12 +17,10 @@ class ProtogenWriter(BlockWriter):
 
         for schematic_file in config["schematics"]:
             for schematic in schematic_file:
-                
+
                 def _new_object_name():
                     return f"New{schematic.name.capitalize()}Object new_{schematic.name.lower()}_object"
-                
-                
-                
+
                 file_writer = open(
                     f"{proto_directory}/{schematic.name.lower()}.proto", "w"
                 )
@@ -63,66 +61,98 @@ class ProtogenWriter(BlockWriter):
                         f"  rpc Read{schematic.name.capitalize()}List(Read{schematic.name.capitalize()}ListRequest) returns (Read{schematic.name.capitalize()}ListResponse) {{}}\n"
                     )
                 file_writer.write("}\n")
-                
-                file_writer.write("\n// ===================== Utils ========================\n\n")
-                
+
+                file_writer.write(
+                    "\n// ===================== Utils ========================\n\n"
+                )
+
                 file_writer.write(f"message {schematic.name.capitalize()}Object {{\n")
                 for i, grpc_variable in enumerate(schematic.grpc_variables):
-                    file_writer.write(f"  {grpc_variable.var_type} {grpc_variable.var_name} = {i+1};\n")
+                    file_writer.write(
+                        f"  {grpc_variable.var_type} {grpc_variable.var_name} = {i+1};\n"
+                    )
                 file_writer.write("}\n")
-                
-                file_writer.write(f"message New{schematic.name.capitalize()}Object {{\n")
-                no_default_variables = list( schematic.grpc_variables | where(lambda x: x.default==False))
+
+                file_writer.write(
+                    f"message New{schematic.name.capitalize()}Object {{\n"
+                )
+                no_default_variables = list(
+                    schematic.grpc_variables | where(lambda x: x.default == False)
+                )
                 for i, grpc_variable in enumerate(no_default_variables):
-                    file_writer.write(f"  {grpc_variable.var_type} {grpc_variable.var_name} = {i+1};\n")
+                    file_writer.write(
+                        f"  {grpc_variable.var_type} {grpc_variable.var_name} = {i+1};\n"
+                    )
                 file_writer.write("}\n")
-                
-                
-                file_writer.write("\n// ===================== Request ========================\n\n")
-                
+
+                file_writer.write(
+                    "\n// ===================== Request ========================\n\n"
+                )
+
                 if "create" in config["crud_instructions"]:
-                    file_writer.write(f"message Create{schematic.name.capitalize()}Request {{ {_new_object_name()} = 1; }}\n")
-                
+                    file_writer.write(
+                        f"message Create{schematic.name.capitalize()}Request {{ {_new_object_name()} = 1; }}\n"
+                    )
+
                 if "read" in config["crud_instructions"]:
-                    file_writer.write(f"message Read{schematic.name.capitalize()}Request {{ int32 id = 1; }}\n")
-                
+                    file_writer.write(
+                        f"message Read{schematic.name.capitalize()}Request {{ int32 id = 1; }}\n"
+                    )
+
                 if "update" in config["crud_instructions"]:
-                    file_writer.write(f"message Update{schematic.name.capitalize()}Request {{\n  int32 id = 1;\n  {_new_object_name()} = 2;\n}}\n")
-                
+                    file_writer.write(
+                        f"message Update{schematic.name.capitalize()}Request {{\n  int32 id = 1;\n  {_new_object_name()} = 2;\n}}\n"
+                    )
+
                 if "delete" in config["crud_instructions"]:
-                    file_writer.write(f"message Delete{schematic.name.capitalize()}Request {{ int32 id = 1; }}\n")
-                
+                    file_writer.write(
+                        f"message Delete{schematic.name.capitalize()}Request {{ int32 id = 1; }}\n"
+                    )
+
                 if "read_list" in config["crud_instructions"]:
-                    file_writer.write(f"message ReadList{schematic.name.capitalize()}Request{{}}\n")
-                
-                file_writer.write("\n// ===================== Response ========================\n\n")
-                
-                                
+                    file_writer.write(
+                        f"message ReadList{schematic.name.capitalize()}Request{{}}\n"
+                    )
+
+                file_writer.write(
+                    "\n// ===================== Response ========================\n\n"
+                )
+
                 if "create" in config["crud_instructions"]:
-                    file_writer.write(f"message Create{schematic.name.capitalize()}Response {{ string msg = 1; }}\n")
-                
+                    file_writer.write(
+                        f"message Create{schematic.name.capitalize()}Response {{ string msg = 1; }}\n"
+                    )
+
                 if "read" in config["crud_instructions"]:
-                    file_writer.write(f"message Read{schematic.name.capitalize()}Response {{\n  {_new_object_name()} = 1;\n  string msg = 2;\n}}\n")
-                
+                    file_writer.write(
+                        f"message Read{schematic.name.capitalize()}Response {{\n  {_new_object_name()} = 1;\n  string msg = 2;\n}}\n"
+                    )
+
                 if "update" in config["crud_instructions"]:
-                    file_writer.write(f"message Update{schematic.name.capitalize()}Response {{\n  int32 id = 1;\n  {_new_object_name()} = 2;\n}}\n")
-                
+                    file_writer.write(
+                        f"message Update{schematic.name.capitalize()}Response {{\n  int32 id = 1;\n  {_new_object_name()} = 2;\n}}\n"
+                    )
+
                 if "delete" in config["crud_instructions"]:
-                    file_writer.write(f"message Delete{schematic.name.capitalize()}Response {{ string msg = 1; }}\n")
-                
+                    file_writer.write(
+                        f"message Delete{schematic.name.capitalize()}Response {{ string msg = 1; }}\n"
+                    )
+
                 if "read_list" in config["crud_instructions"]:
-                    file_writer.write(f"message ReadList{schematic.name.capitalize()}Response {{\n  repeated {_new_object_name()} = 1;\n  string msg = 2;\n}}\n")
-                
+                    file_writer.write(
+                        f"message ReadList{schematic.name.capitalize()}Response {{\n  repeated {_new_object_name()} = 1;\n  string msg = 2;\n}}\n"
+                    )
+
                 file_writer.close()
-        
+
         # ==== Protogen.sh  ====
-        
+
         file_writer = open(
             f"{get_relative_project_root_directory(config)}/{protogen_sh}", "w"
         )
         file_writer.write(
             textwrap.dedent(
-               f"""\
+                f"""\
             #!/bin/bash
             echo "generating gRPC..."
             proto_dir=proto
@@ -148,10 +178,10 @@ class ProtogenWriter(BlockWriter):
     def write_test(self, config: dict) -> None:
         pass
 
-    def docker_compose_write(self, config: dict) -> None:
+    def write_docker_compose(self, config: dict) -> None:
         pass
 
-    def config_write(self, config: dict) -> None:
+    def write_config(self, config: dict) -> None:
         pass
 
 

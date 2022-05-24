@@ -1,4 +1,4 @@
-import textwrap
+from utils.pathing import indent_writer
 from gen.block_writer_abstract import BlockWriter
 from utils.pathing import get_relative_project_src_directory
 
@@ -18,12 +18,12 @@ class PostgresModelWriter(BlockWriter):
                     f"{get_relative_project_src_directory(config)}/{models}/{schematic.name}.py",
                     "w",
                 )
-                file_writer.write(
-                    textwrap.dedent(
-                        f"""\
+                indent_writer(
+                    lvl=0,
+                    text=f"""
                     from {connection}.postgres_connection import Base
-                """
-                    )
+                """,
+                    file_writer=file_writer,
                 )
 
                 if config["service"] == "gRPC":
@@ -36,54 +36,71 @@ class PostgresModelWriter(BlockWriter):
                 if config["service"] == "gRPC":
 
                     # Constructor
-
-                    file_writer.write(
-                        textwrap.dedent(
-                            f"""\
-                        \n
-                        \tdef __init__(
-                                self,
-                        """
-                        )
+                    indent_writer(
+                        lvl=4,
+                        text=f"""
+                        def __init__(
+                            self,
+                        """,
+                        file_writer=file_writer,
                     )
                     for variable_name in schematic.variable_names:
-                        file_writer.write(f"\t\t{variable_name}=None,\n")
-
-                    file_writer.write(
-                        textwrap.dedent(
-                            f"""\
-                            \tgrpc_{schematic.name.lower()}_object: {schematic.name.lower()}_pb2.New{schematic.name.capitalize()}Object = None 
-                        \t) -> None:
-                            \tif grpc_{schematic.name.lower()}_object:
-                    """
+                        indent_writer(
+                            lvl=8,
+                            text=f"{variable_name}=None,\n",
+                            file_writer=file_writer,
                         )
+                    indent_writer(
+                        lvl=8,
+                        text=f"""\
+                        grpc_{schematic.name.lower()}_object: {schematic.name.lower()}_pb2.New{schematic.name.capitalize()}Object = None 
+                        ) -> None:
+                            if grpc_{schematic.name.lower()}_object:
+                    """,
+                        file_writer=file_writer,
                     )
                     for variable_name in schematic.variable_names:
-                        file_writer.write(
-                            f"\t\t\tself.{variable_name} = grpc_{schematic.name.lower()}_channel_object.{variable_name},\n"
+                        indent_writer(
+                            lvl=12,
+                            text=f"""\
+                            self.{variable_name} = grpc_{schematic.name.lower()}_channel_object.{variable_name},\n
+                            """,
+                            file_writer=file_writer,
                         )
-                    file_writer.write("\t\telse:\n")
+                    indent_writer(
+                        lvl=8,
+                        text=f"else:\n",
+                        file_writer=file_writer,
+                    )
                     for variable_name in schematic.variable_names:
-                        file_writer.write(
-                            f"\t\t\tself.{variable_name}={variable_name},\n"
+                        indent_writer(
+                            lvl=12,
+                            text=f"self.{variable_name}={variable_name},\n",
+                            file_writer=file_writer,
                         )
 
                     # to grpc object
 
-                    file_writer.write(
-                        textwrap.dedent(
-                            f"""\
+                    indent_writer(
+                        lvl=4,
+                        text=f"""\
                                 \n
-                        \tdef to_grpc_object(self) -> {schematic.name.lower()}_pb2.{schematic.name.capitalize()}Object:
-                            \treturn {schematic.name.lower()}_pb2.{schematic.name.capitalize()}Object(
-                    """
-                        )
+                        def to_grpc_object(self) -> {schematic.name.lower()}_pb2.{schematic.name.capitalize()}Object:
+                            return {schematic.name.lower()}_pb2.{schematic.name.capitalize()}Object(
+                    """,
+                        file_writer=file_writer,
                     )
                     for variable_name in schematic.variable_names:
-                        file_writer.write(
-                            f"\t\t\t{variable_name}=self.{variable_name},\n"
+                        indent_writer(
+                            lvl=12,
+                            text=f"{variable_name}=self.{variable_name},\n",
+                            file_writer=file_writer,
                         )
 
-                    file_writer.write("\t\t)")
+                    indent_writer(
+                        lvl=8,
+                        text=")",
+                        file_writer=file_writer,
+                    )
 
                 file_writer.close()

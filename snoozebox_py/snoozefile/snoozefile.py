@@ -3,6 +3,7 @@ from pathlib import Path
 
 SNOOZEFILE_DEFAULT_CONTENTS = """"
 [services]
+# Do not edit this value
 occupied_ports=[]
 
 [options]
