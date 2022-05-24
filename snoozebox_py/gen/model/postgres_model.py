@@ -47,13 +47,13 @@ class PostgresModelWriter(BlockWriter):
                     for variable_name in schematic.variable_names:
                         indent_writer(
                             lvl=8,
-                            text=f"{variable_name}=None,\n",
+                            text=f"{variable_name} = None,\n",
                             file_writer=file_writer,
                         )
                     indent_writer(
                         lvl=8,
                         text=f"""\
-                        grpc_{schematic.name.lower()}_object: {schematic.name.lower()}_pb2.New{schematic.name.capitalize()}Object = None 
+                            grpc_{schematic.name.lower()}_object: {schematic.name.lower()}_pb2.New{schematic.name.capitalize()}Object = None 
                         ) -> None:
                         if grpc_{schematic.name.lower()}_object:
                     """,
@@ -75,7 +75,7 @@ class PostgresModelWriter(BlockWriter):
                     for variable_name in schematic.variable_names:
                         indent_writer(
                             lvl=12,
-                            text=f"self.{variable_name}={variable_name},\n",
+                            text=f"self.{variable_name} = {variable_name},\n",
                             file_writer=file_writer,
                         )
 

@@ -3,7 +3,7 @@ from utils.pathing import (
     get_relative_project_root_directory,
     get_relative_tests_directory,
 )
-import textwrap
+from utils.pathing import indent_writer
 
 
 class RedisConnection(BlockWriter):
@@ -22,9 +22,9 @@ class RedisConnection(BlockWriter):
             "w+",
         )
 
-        file_writer.write(
-            textwrap.dedent(
-                f"""\
+        indent_writer(
+            lvl=0,
+            text=f"""\
             from redis import StrictRedis
             from {utils}.config import CONFIG
             from typing import Optional, Any
@@ -67,8 +67,8 @@ class RedisConnection(BlockWriter):
 
             def redis_flush():
                 return get_cache_pool().flushdb()
-            """
-            )
+            """,
+            file_writer=file_writer,
         )
 
     def write_test(self, config: dict) -> None:
@@ -81,10 +81,9 @@ class RedisConnection(BlockWriter):
             f"{get_relative_tests_directory(config)}/{config['settings']['file_structure']['test_directories']['test_connection'][0]}/test_cassandra.py",
             "a",
         )
-
-        file_writer.write(
-            textwrap.dedent(
-                f"""\
+        indent_writer(
+            lvl=0,
+            text=f"""\
             import unittest
             from {connection}.redis_connection import get_cache_pool
             
@@ -94,16 +93,16 @@ class RedisConnection(BlockWriter):
                     redis_set("test_key", "test_value")
                     self.assertTrue(str(redis_get("test_key")), "test_value")
             
-            """
-            )
+            """,
+            file_writer=file_writer,
         )
         file_writer.close()
 
     def write_docker_compose(self, config: dict) -> None:
         file_writer = open(config["settings"]["file_structure"]["docker_compose"], "a")
-        file_writer.write(
-            textwrap.dedent(
-                f"""\
+        indent_writer(
+            lvl=2,
+            text=f"""\
             {config["project_name"]}_cache:
               container_name: {config["project_name"]}_cache
               image: redis:latest
@@ -115,7 +114,7 @@ class RedisConnection(BlockWriter):
                 - ./data/redis:/data 
               networks:
                 - {config["settings"]["docker_compose_network"]}   
-        """
-            )
+        """,
+            file_writer=file_writer,
         )
         file_writer.close()

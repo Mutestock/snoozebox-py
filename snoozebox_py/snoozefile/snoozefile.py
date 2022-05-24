@@ -21,3 +21,8 @@ def generate_snoozefile(path: Path = None):
                 file_writer.write(SNOOZEFILE_DEFAULT_CONTENTS)
         else:
             print("snoozefile was not empty. Won't write stuff on it")
+
+
+def check_available_ports():
+    pass
+

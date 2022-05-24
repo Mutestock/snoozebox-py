@@ -122,7 +122,7 @@ def _determine_type_for_grpc(sql_line: str) -> str:
     elif dtype in ["bool", "boolean"]:
         return "bool"
     else:
-        return "str"
+        return "string"
 
 def _make_class_def(sql: str) -> Conversion:
     object_name: str = (

@@ -1,4 +1,4 @@
-import textwrap
+from utils.pathing import indent_writer
 from typing import List
 from gen.block_writer_abstract import BlockWriter
 from utils.pathing import (
@@ -24,9 +24,9 @@ class ConfigWriter(BlockWriter):
             f"{get_relative_project_src_directory(config)}/{utils}/config.py"
         )
 
-        file_writer.write(
-            textwrap.dedent(
-                f"""\
+        indent_writer(
+            lvl=0,
+            text=f"""\
             import os
             import toml
 
@@ -59,8 +59,8 @@ class ConfigWriter(BlockWriter):
 
 
             CONFIG = get_config_with_mode()
-        """
-            )
+        """,
+            file_writer=file_writer,
         )
 
     @staticmethod
@@ -74,8 +74,9 @@ class ConfigWriter(BlockWriter):
         rtoml.dump(
             config["relative_config_toml"],
             open(f"{get_relative_generated_config_file(config)}", "w"),
-            pretty=True
+            pretty=True,
         )
+
 
 def dict_recurse_define(base: dict, keys: List[str]) -> None:
     key_to_append = keys[0]

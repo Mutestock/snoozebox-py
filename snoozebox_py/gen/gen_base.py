@@ -46,13 +46,10 @@ def exec_gen(config: dict) -> None:
     print("Writing the specified files...")
     ConfigWriter.initial_conf_push(config)
     initial_docker_compose_check(config)
-    
+
     for writer in writers:
         instantiated = writer()
-        instantiated.write(config)
-        instantiated.write_test(config)
-        instantiated.write_config(config)
-        instantiated.write_docker_compose(config)
+        instantiated.write_all(config)
     touch_docker(config)
     touch_misc(config)
     ConfigWriter.final_conf_toml_gen(config)
@@ -135,6 +132,7 @@ def _populate_generation_writers(config: dict) -> list:
         ()
     else:
         print("Chosen service wasn't found. This should never happen")
+    #writers += get_generic_writers()
 
     return writers
 
