@@ -1,4 +1,4 @@
-from snoozelib import sql_tables_to_classes
+from snoozelib import _determine_type_for_grpc, sql_tables_to_classes
 import textwrap
 
 
@@ -39,3 +39,29 @@ def test_unique_gets_added():
     assert "unique=True" in actual[0].resolve_contents()
     
     
+def test_grpc_types():
+    sql: str = textwrap.dedent(f"""\
+    CREATE TABLE whatevs IF NOT EXISTS(
+        id SERIAL NOT NULL,
+        stuff VARCHAR(255) NOT NULL
+    );
+    """)
+    actual = sql_tables_to_classes(sql)
+    
+    
+    
+if __name__ == "__main__":
+    
+    sql: str = textwrap.dedent(f"""\
+    CREATE TABLE whatevs IF NOT EXISTS(
+        id SERIAL NOT NULL,
+        stuff VARCHAR(255) NOT NULL
+    );
+    """)
+    actual = sql_tables_to_classes(sql)
+    print(actual[0].grpc_variables)
+    #garbage()
+    sql_split = sql.split(",")
+    for line in sql_split:
+        line = line.lower()
+        print(_determine_type_for_grpc(line))

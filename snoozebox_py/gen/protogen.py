@@ -29,7 +29,7 @@ class ProtogenWriter(BlockWriter):
                     textwrap.dedent(
                         f"""\
                 syntax = "proto3";
-                package = {schematic.name.lower()};
+                package {schematic.name.lower()};
                 
                 service {schematic.name.capitalize()}{{
                 """
@@ -111,7 +111,7 @@ class ProtogenWriter(BlockWriter):
 
                 if "read_list" in config["crud_instructions"]:
                     file_writer.write(
-                        f"message ReadList{schematic.name.capitalize()}Request{{}}\n"
+                        f"message Read{schematic.name.capitalize()}ListRequest{{}}\n"
                     )
 
                 file_writer.write(
@@ -140,7 +140,7 @@ class ProtogenWriter(BlockWriter):
 
                 if "read_list" in config["crud_instructions"]:
                     file_writer.write(
-                        f"message ReadList{schematic.name.capitalize()}Response {{\n  repeated {_new_object_name()} = 1;\n  string msg = 2;\n}}\n"
+                        f"message Read{schematic.name.capitalize()}ListResponse {{\n  repeated {_new_object_name()} = 1;\n  string msg = 2;\n}}\n"
                     )
 
                 file_writer.close()
@@ -164,11 +164,6 @@ class ProtogenWriter(BlockWriter):
                 python -m grpc_tools.protoc -I./proto --python_out=./{config["project_name"]}/protogen --grpc_python_out=./{config["project_name"]}/protogen $entry
                 sed -i "s/import ${{proto_name}}_pb2 as ${{proto_name}}__pb2/import protogen.${{proto_name}}_pb2 as ${{proto_name}}__pb2/g" "./{config["project_name"]}/protogen/${{proto_name}}_pb2_grpc.py"
             done
-
-            export AUDIO_ARCHIVER_TESTING=1
-
-            echo "running nose..."
-            nose2 -v
             echo "done"           
         """
             )

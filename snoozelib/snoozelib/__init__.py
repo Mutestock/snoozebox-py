@@ -21,6 +21,7 @@ def sql_tables_to_classes(sql: str) -> List[Conversion]:
         if "create table" in statement
     ]
     statements = [_make_class_def(statement) for statement in statements]
+    print("aaaaaaaaaaaah")
     return statements
 
 
@@ -73,7 +74,8 @@ def _check_unique(sql: str, code: str) -> str:
 
 def _get_only_numbers(sql: str, data_type: str) -> str:
     only_post_data_type: str = re.sub(rf"^.+?(?={data_type})", "", sql)
-    contents_inside_brackets: str = re.findall(r"\([^)]*\)", only_post_data_type)[0]
+    contents_inside_brackets: str = re.findall(
+        r"\([^)]*\)", only_post_data_type)[0]
     only_numbers: str = "".join(re.findall(r"\d", contents_inside_brackets))
     return only_numbers
 
@@ -83,7 +85,8 @@ def _check_n_value(sql: str, code: str, data_type: str) -> str:
     if "(n)" in code:
         only_numbers: str = _get_only_numbers(sql, data_type)
         if not only_numbers:
-            raise MissingExpectedValue("No numbers were found post _check_n_value")
+            raise MissingExpectedValue(
+                "No numbers were found post _check_n_value")
         return code.replace("(n)", "(" + only_numbers + ")")
     else:
         return code
@@ -124,9 +127,11 @@ def _determine_type_for_grpc(sql_line: str) -> str:
     else:
         return "string"
 
+
 def _make_class_def(sql: str) -> Conversion:
     object_name: str = (
-        re.sub(r"^.+?(?=create table)", "", sql).replace("create table", "").split()[0]
+        re.sub(r"^.+?(?=create table)", "",
+               sql).replace("create table", "").split()[0]
     ).replace("(", "")
     variables: List[str] = _rinse_pre_class_def(sql).split(",")
     conversion = Conversion(name=object_name)
@@ -142,12 +147,14 @@ def _make_class_def(sql: str) -> Conversion:
         code = _check_nullable(sql_line, code)
         code = _check_unique(sql_line, code)
         code = _check_n_value(sql_line, code, data_type)
-        var_name = sql_line.replace("(", "").replace(")", "").lstrip().split()[0]
+        var_name = sql_line.replace(
+            "(", "").replace(")", "").lstrip().split()[0]
         code = f"{var_name} = {code}\n"
         if not conversion.grpc_variables:
             conversion.grpc_variables = []
         conversion.grpc_variables.append(
-            GrpcVariable(var_name=var_name, var_type=_determine_type_for_grpc(sql_line), default="default" in sql_line)
+            GrpcVariable(var_name=var_name, var_type=_determine_type_for_grpc(
+                sql_line), default="default" in sql_line)
         )
         if not conversion.variable_names:
             conversion.variable_names = []

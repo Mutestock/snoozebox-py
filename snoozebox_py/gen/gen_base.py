@@ -9,7 +9,7 @@ from gen.logic.handlers.grpc_handler import GrpcHandler
 from gen.service.grpc import grpc_main_gen, grpc_routes_gen
 from gen.model.postgres_model import PostgresModelWriter
 from gen.protogen import ProtogenWriter, run_protogen
-from utils.poetry_exec import run_poetry
+from utils.poetry_exec import run_poetry, poetry_export_requirements
 from utils.pathing import (
     create_directories_if_not_exists,
     get_relative_project_src_directory,
@@ -17,15 +17,15 @@ from utils.pathing import (
 )
 from gen.config_gen import ConfigWriter
 from gen.connection.redis_gen import RedisConnection
-from gen.docker_gen import final_docker_compose_check, initial_docker_compose_check
+from gen.docker_gen import final_docker_compose_check, initial_docker_compose_check, write_docker_file
 
 
 def exec_gen(config: dict) -> None:
     writers: list = _populate_generation_writers(config)
     _collect_dependencies(config)
-
     print("Running Poetry...")
     run_poetry(config)
+    poetry_export_requirements(config)
     print("Making required directories...")
     create_directories_if_not_exists(
         [
@@ -43,10 +43,11 @@ def exec_gen(config: dict) -> None:
             ].values()
         ]
     )
-    print("Writing the specified files...")
     ConfigWriter.initial_conf_push(config)
+    print("Configuring Docker...")
     initial_docker_compose_check(config)
-
+    write_docker_file(config)
+    print("Writing the specified files...")
     for writer in writers:
         instantiated = writer()
         instantiated.write_all(config)

@@ -78,7 +78,7 @@ class RedisConnection(BlockWriter):
         ][0]
 
         file_writer = open(
-            f"{get_relative_tests_directory(config)}/{config['settings']['file_structure']['test_directories']['test_connection'][0]}/test_cassandra.py",
+            f"{get_relative_tests_directory(config)}/{config['settings']['file_structure']['test_directories']['test_connection'][0]}/test_redis.py",
             "a",
         )
         indent_writer(

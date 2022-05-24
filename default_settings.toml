@@ -12,6 +12,7 @@ host="localhost"
 port=15310
 pwd="snoozebox-redis-pwd"
 dependencies=["redis"]
+debian_dependencies=[]
 
 [settings.database.cassandra]
 host="localhost"
@@ -20,6 +21,7 @@ usr="snoozebox-cassandra-usr"
 pwd="snoozebox-cassandra-pwd"
 keyspace="snoozebox-cassandra-keyspace"
 dependencies=["cassandra-driver"]
+debian_dependencies=[]
 
 [settings.database.postgres]
 host="localhost"
@@ -28,6 +30,7 @@ usr="snoozebox-pg-user"
 pwd="snoozebox-pg-pwd"
 db="snoozebox-pg-db"
 dependencies=["psycopg2", "sqlalchemy","sqlalchemy-utils"]
+debian_dependencies=["gcc", "libpq-dev"]
 
 [settings.database.mongodb]
 host="localhost"
@@ -35,25 +38,30 @@ port=15313
 usr="snoozebox-mongodb-usr"
 pwd="snoozebox-mongodb-pwd"
 dependencies=["pymongo"]
+debian_dependencies=[]
 
 [settings.server]
 [settings.server.grpc]
 host="localhost"
 port=15210
 dependencies=["grpcio", "grpcio-tools"]
+debian_dependencies=[]
 
 [settings.server.rest]
 host="localhost"
 port=15211
 dependencies=["flask"]
+debian_dependencies=[]
 
 [settings.server.kafka]
 host="localhost"
 dependencies=["kafka"]
+debian_dependencies=[]
 
 [settings.server.rabbitmq]
 host="localhost"
 dependencies=["pika"]
+debian_dependencies=[]
 
 [settings.file_structure]
 root_services="services"
