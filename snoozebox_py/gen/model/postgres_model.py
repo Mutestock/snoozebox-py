@@ -55,7 +55,7 @@ class PostgresModelWriter(BlockWriter):
                         text=f"""\
                         grpc_{schematic.name.lower()}_object: {schematic.name.lower()}_pb2.New{schematic.name.capitalize()}Object = None 
                         ) -> None:
-                            if grpc_{schematic.name.lower()}_object:
+                        if grpc_{schematic.name.lower()}_object:
                     """,
                         file_writer=file_writer,
                     )
