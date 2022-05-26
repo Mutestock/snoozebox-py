@@ -101,7 +101,7 @@ class PostgresConnection(BlockWriter):
                   - POSTGRES_DB={config['settings']['database']['postgres']['db']}
                   - PGDATA=/var/lib/postgresql/data
                 ports:
-                  - xcvpkfposdkfpsodkf:5432
+                  - {config['settings']['database']['postgres']['port']}:5432
                 volumes:
                   - ./data/postgres:/var/lib/postgresql/data
                 networks:
@@ -124,7 +124,7 @@ class PostgresConnection(BlockWriter):
                   - POSTGRES_DB={config['settings']['database']['postgres']['db']}
                   - PGDATA=/var/lib/postgresql/data
                 ports:
-                  - xcvpkfposdkfpsodkf:5432
+                  - {config['settings']['database']['postgres']['port']+1}:5432
                 volumes:
                   - ./data/postgres_test:/var/lib/postgresql/data
                 networks:
@@ -155,6 +155,6 @@ class PostgresConnection(BlockWriter):
             ] = config["settings"]["database"]["postgres"]["pwd"]
             config["relative_config_toml"][mode]["database"]["postgres"]["db"] = config[
                 "settings"
-            ]["database"]["postgres"]["host"]
+            ]["database"]["postgres"]["db"]
 
         list(["local", "test"] | select(lambda x: mode_write(config, x)))

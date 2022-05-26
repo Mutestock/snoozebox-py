@@ -51,11 +51,11 @@ class PostgresModelWriter(BlockWriter):
                             file_writer=file_writer,
                         )
                     indent_writer(
-                        lvl=8,
+                        lvl=4,
                         text=f"""\
                             grpc_{schematic.name.lower()}_object: {schematic.name.lower()}_pb2.New{schematic.name.capitalize()}Object = None 
                         ) -> None:
-                        if grpc_{schematic.name.lower()}_object:
+                            if grpc_{schematic.name.lower()}_object:
                     """,
                         file_writer=file_writer,
                     )
@@ -63,7 +63,7 @@ class PostgresModelWriter(BlockWriter):
                         indent_writer(
                             lvl=12,
                             text=f"""\
-                            self.{variable_name} = grpc_{schematic.name.lower()}_channel_object.{variable_name},\n
+                            self.{variable_name} = grpc_{schematic.name.lower()}_channel_object.{variable_name},
                             """,
                             file_writer=file_writer,
                         )

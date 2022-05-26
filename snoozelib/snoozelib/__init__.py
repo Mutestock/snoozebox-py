@@ -21,7 +21,6 @@ def sql_tables_to_classes(sql: str) -> List[Conversion]:
         if "create table" in statement
     ]
     statements = [_make_class_def(statement) for statement in statements]
-    print("aaaaaaaaaaaah")
     return statements
 
 

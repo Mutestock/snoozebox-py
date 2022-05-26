@@ -34,7 +34,7 @@ class ConfigWriter(BlockWriter):
             _ROOT_DIR = os.path.dirname(_ROOT_DIR)
 
             ROOT_DIR = os.path.dirname(_ROOT_DIR)
-            CONFIG_FILE_PATH = ROOT_DIR + "/{config_file_name}.toml"
+            CONFIG_FILE_PATH = ROOT_DIR + "/{config_file_name}"
             LOG_FILE_PATH = ROOT_DIR + "/logs"
 
             CONFIG = {{}}

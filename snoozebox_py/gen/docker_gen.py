@@ -69,9 +69,10 @@ def grpc_dockerfile(config: dict) -> None:
             COPY . /app
             WORKDIR /app
             RUN apt-get update
-            RUN apt-get install {" ".join(_get_apt_dependencies(config))}
+            RUN apt-get install {" ".join(_get_apt_dependencies(config))} -y
             RUN pip install -r requirements.txt
-            CMD ["python", "audio_archiver/main.py"]
+            EXPOSE {config["settings"]["server"]["grpc"]["port"]}
+            CMD ["python", "{config["project_name"]}/main.py"]
     """,
         file_writer=file_writer,
     )

@@ -1,9 +1,11 @@
 from gen.block_writer_abstract import BlockWriter
+from gen.config_gen import dict_recurse_define
 from utils.pathing import (
     get_relative_project_src_directory,
     get_relative_tests_directory,
 )
 from utils.pathing import indent_writer
+from pipe import select
 
 
 class RedisConnection(BlockWriter):
@@ -29,7 +31,7 @@ class RedisConnection(BlockWriter):
             from {utils}.config import CONFIG
             from typing import Optional, Any
 
-            REDIS_CONFIG: dict = CONFIG["db"]["redis"]
+            REDIS_CONFIG: dict = CONFIG["database"]["redis"]
 
 
             def get_cache_pool(settings: dict = None) -> StrictRedis:
@@ -40,7 +42,7 @@ class RedisConnection(BlockWriter):
                     port=settings["port"],
                     password=settings["pwd"],
                     charset="utf-8",
-                    db=settings["db"],
+                    db=settings["database"],
                     decode_responses=True,
                 )
 
@@ -97,6 +99,27 @@ class RedisConnection(BlockWriter):
             file_writer=file_writer,
         )
         file_writer.close()
+        
+        
+    def write_config(self, config: dict) -> None:
+        def mode_write(config: dict, mode: str) -> None:
+            dict_recurse_define(
+                config, ["relative_config_toml", mode, "database", "redis"]
+            )
+            config["relative_config_toml"][mode]["database"]["redis"][
+                "host"
+            ] = config["settings"]["database"]["redis"]["host"]
+            config["relative_config_toml"][mode]["database"]["redis"][
+                "port"
+            ] = config["settings"]["database"]["redis"]["port"]
+            config["relative_config_toml"][mode]["database"]["redis"][
+                "pwd"
+            ] = config["settings"]["database"]["redis"]["pwd"]
+            config["relative_config_toml"][mode]["database"]["redis"][
+                "db"
+            ] = config["settings"]["database"]["redis"]["db"]
+
+        list(["local", "test"] | select(lambda x: mode_write(config, x)))
 
     def write_docker_compose(self, config: dict) -> None:
         file_writer = open(config["settings"]["file_structure"]["docker_compose"], "a")

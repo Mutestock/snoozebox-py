@@ -16,11 +16,10 @@ class Grpc(BlockWriter):
         service: str = project_directories["service"][0]
         protogen: str = project_directories["protogen"][0]
         utils: str = project_directories["utils"][0]
+        routes: str = project_directories["routes"][0]
         schematics: str = config["schematics"]
-
-        file_writer = open(
-            f"{get_relative_project_src_directory(config)}/{service}/grpc_main.py", "w"
-        )
+    
+        file_writer = open(f"{get_relative_project_src_directory(config)}/main.py", "w")
         indent_writer(
             lvl=0,
             text=f"""\
@@ -46,7 +45,7 @@ class Grpc(BlockWriter):
                 indent_writer(
                     lvl=0,
                     text=f"""\
-                    from {service}.grpc.routes.{schematic.name.lower()}_routes import {schematic.name.capitalize()}Router
+                    from {service}.{routes}.{schematic.name.lower()}_routes import {schematic.name.capitalize()}Router
                     """,
                     file_writer=file_writer,
                 )
@@ -54,7 +53,7 @@ class Grpc(BlockWriter):
                 lvl=0,
                 text=f"""\
                 \n
-                    def run_grpc() -> None:
+                    def main() -> None:
                         uri = f"{{CONFIG['grpc']['host']}}:{{CONFIG['grpc']['port']}}"
                         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
                         print(f"GRPC: running on {{uri}}")
@@ -64,7 +63,6 @@ class Grpc(BlockWriter):
 
         for schematic_file in schematics:
             for schematic in schematic_file:
-
                 indent_writer(
                     lvl=4,
                     text=f"add_{schematic.name.capitalize()}Servicer_to_server({schematic.name.capitalize()}Router(), server)\n",
@@ -80,6 +78,16 @@ class Grpc(BlockWriter):
                 file_writer=file_writer,
             )
 
+        indent_writer(
+            lvl=0,
+            text=f"""
+        if __name__ == "__main__":
+            main()    
+        """,
+            file_writer=file_writer,
+        )
+        file_writer.close()
+
     def write_test(self, config: dict) -> None:
         pass
 
@@ -94,3 +102,23 @@ class Grpc(BlockWriter):
             ]["grpc"]["port"]
 
         list(["local", "test"] | select(lambda x: mode_write(config, x)))
+
+    def write_docker_compose(self, config: dict) -> None:
+        file_writer = open(config["settings"]["file_structure"]["docker_compose"], "a")
+
+        indent_writer(
+            lvl=2,
+            text=f"""
+            {config["project_name"]}_grpc_service:
+              build: 
+                context: {config["settings"]["file_structure"]["root_services"]}/{config["project_name"]}
+              container_name: {config['project_name']}_grpc_service
+              ports:
+                - {config['settings']['server']['grpc']['port']}:{config['settings']['server']['grpc']['port']}
+              restart: always
+              networks:
+                - {config['settings']['docker_compose_network']}
+                  
+            """,
+            file_writer=file_writer,
+        )

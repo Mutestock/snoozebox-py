@@ -17,7 +17,12 @@ from utils.pathing import (
 )
 from gen.config_gen import ConfigWriter
 from gen.connection.redis_gen import RedisConnection
-from gen.docker_gen import final_docker_compose_check, initial_docker_compose_check, write_docker_file
+from gen.docker_gen import (
+    final_docker_compose_check,
+    initial_docker_compose_check,
+    write_docker_file,
+)
+from gen.gitignore_gen import write_git_ignore
 
 
 def exec_gen(config: dict) -> None:
@@ -53,6 +58,7 @@ def exec_gen(config: dict) -> None:
         instantiated.write_all(config)
     ConfigWriter.final_conf_toml_gen(config)
     final_docker_compose_check(config)
+    write_git_ignore(config)
     print("Running protogen...")
     run_protogen(config)
     print("Ok")
@@ -173,5 +179,9 @@ def _collect_dependencies(config: dict) -> None:
     else:
         print("Chosen service wasn't found. This should never happen")
 
-    dependencies = dependencies + config["settings"]["general_dependencies"]
+    dependencies = (
+        dependencies
+        + config["settings"]["general_dependencies"]
+        + config["settings"]["database"]["redis"]["dependencies"]
+    )
     config["collected_dependencies"] = dependencies

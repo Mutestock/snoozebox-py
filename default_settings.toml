@@ -11,6 +11,7 @@ docker_compose_network="snooze-net"
 host="localhost"
 port=15310
 pwd="snoozebox-redis-pwd"
+db=0
 dependencies=["redis"]
 debian_dependencies=[]
 

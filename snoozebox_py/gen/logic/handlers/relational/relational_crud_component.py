@@ -23,7 +23,7 @@ class RelationalCrudComponent(BlockWriter):
             textwrap.dedent(f"""\
                 import json
                 from sqlalchemy import insert, delete, update, select
-                from {connection}.pg_connection import exec_stmt
+                from {connection}.postgres_connection import exec_stmt
                 from {logic}.{handlers}.{handler_utils}.generic_tools import (
                     prepare_object_for_querying,
                     iter_parse_datetime,
