@@ -1,0 +1,7 @@
+from connection.postgres_connection import engine
+from sqlalchemy_utils import database_exists
+                
+                
+class TestPostgres(unittest.testcase):
+    def test_connection(self):
+        self.assertTrue(database_exists(engine.url))
