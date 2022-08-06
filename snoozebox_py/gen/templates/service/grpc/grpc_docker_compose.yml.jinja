@@ -1,0 +1,9 @@
+  {{config["project_name"]}}_grpc_service:
+    build:
+      context: {{config["settings"]["file_structure"]["root_services"]}}/{{config["project_name"]}}
+    container_name: {{config["project_name"]}}_grpc_service
+    ports:
+      - {{config['settings']['server']['grpc']['port']}}:{{config['settings']['server']['grpc']['port']}}
+    restart: always
+    networks:
+      - {{config['settings']['docker_compose_network']}}

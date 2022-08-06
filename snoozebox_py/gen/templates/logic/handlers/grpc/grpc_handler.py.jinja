@@ -28,7 +28,7 @@ def __init__(self):
             return {{schematic.name.lower()}}_pb2.Create{{schematic.name.capitalize()}}Response(msg=SUCCESFUL_TRANSACTION)
         except Exception as ex:
             logging.error(
-                f"{{schematic.name.capitalize()}} create failed. Error: {{"{"}}ex{{"}"}}, type = {{"{"}}type(ex){{"}"}}"
+                f"{{schematic.name.capitalize()}} create failed. Error: {ex}, type = {type(ex)}"
             )01
             return {{schematic.name.lower()}}_pb2.Create{{schematic.name.capitalize()}}Response(
                 msg=make_error_message(ex) + " " + str(request)
@@ -46,7 +46,7 @@ def read(
         )
     except Exception as ex:
         logging.error(
-            f"{{schematic.name.capitalize()}} read failed id: {{"{"}}request.id{{"}"}}, Error: {{"{"}}ex{{"}"}}, {{"{"}}{{schematic.name.lower()}}{{"}"}} = {{"{"}}{{schematic.name.capitalize()}}(){{"}"}}, type = {{"{"}}type(ex){{"}"}}"
+            f"{{schematic.name.capitalize()}} read failed id: {request.id}, Error: {ex}, {{"{"}}{{schematic.name.lower()}}{{"}"}} = {{"{"}}{{schematic.name.capitalize()}}(){{"}"}}, type = {type(ex)}"
         )
         return {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}Response(msg=make_error_message(ex))
 {% endif %}
@@ -60,7 +60,7 @@ def update(
         return {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Response(msg=SUCCESFUL_TRANSACTION)
     except Exception as ex:
         logging.error(
-            f"{{schematic.name.capitalize()}} update failed Error: {{"{"}}ex{{"}"}}, {{"{"}}{{schematic.name.lower()}}{{"}"}} = {{"{"}}{{schematic.name.capitalize()}}{{"}"}}(), type = {{"{"}}type(ex){{"}"}}"
+            f"{{schematic.name.capitalize()}} update failed Error: {ex}, {{"{"}}{{schematic.name.lower()}}{{"}"}} = {{"{"}}{{schematic.name.capitalize()}}{{"}"}}(), type = {type(ex)}"
         )
         return {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Response(msg=make_error_message(ex))
 {% endif %}
@@ -73,7 +73,7 @@ def delete(
         return {{schematic.name.lower()}}_pb2.Delete{{schematic.name.capitalize()}}Response(msg=SUCCESFUL_TRANSACTION)
     except Exception as ex:
         logging.error(
-            f"{{schematic.name.capitalize()}} delete failed id: {{"{"}}request.id{{"}"}}, Error: {{"{"}}ex{{"}"}}, {{schematic.name.lower()}} = {{{schematic.name.capitalize()}}}(), type = {{"{"}}type(ex){{"}"}}"
+            f"{{schematic.name.capitalize()}} delete failed id: {request.id}, Error: {ex}, {{schematic.name.lower()}} = {{{schematic.name.capitalize()}}}(), type = {type(ex)}"
         )
         return {{schematic.name.lower()}}_pb2.Delete{{schematic.name.capitalize()}}Response(msg=make_error_message(ex))
 {% endif %}
@@ -87,6 +87,6 @@ def read_list(
             msg=SUCCESFUL_TRANSACTION,
         )
     except Exception as ex:
-        logging.error(f"{{schematic.name.capitalize()}} read list failed: Error: {{"{"}}ex{{"}"}}, type = {{"{"}}type(ex){{"}"}}")
+        logging.error(f"{{schematic.name.capitalize()}} read list failed: Error: {ex}, type = {type(ex)")
         return {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}ListResponse(msg=make_error_message(ex))
 {% endif %}
