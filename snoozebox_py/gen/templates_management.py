@@ -5,7 +5,6 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from gen.gen_base import _collect_dependencies
 from utils.poetry_exec import run_poetry, poetry_export_requirements
 from utils.pathing import (
-    get_relative_project_root_directory,
     get_relative_project_src_directory,
     get_relative_tests_directory,
     get_docker_compose_file,
@@ -52,8 +51,8 @@ def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -
 
 
 def _determine_and_run_database_templates(config: dict, jinja_env: Environment) -> None:
-    {"postgres": _run_pg_templates, "mongodb": None, "cassandra": None,}.get(
-        config["service"].lower()
+    {"postgres": _run_pg_templates, "mongodb": None, "cassandra": None}.get(
+        config["database"].lower()
     )(config, jinja_env)
 
 
@@ -109,6 +108,25 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
             jinja_env=jinja_env,
             render_args={"config": config},
         ),
+        TemplateFileStructure(
+            template_path="logic/handlers/relational/generic_tools.py.jinja",
+            generated_file_path=f"{src}/logic/generic_tools.py",
+            jinja_env=jinja_env,
+            render_args={}
+        ),
+        TemplateFileStructure(
+            template_path="logic/handlers/relational/relational_crud_component.py.jinja",
+            generated_file_path=f"{src}/logic/handlers/handler_utils/crud_handler_component.py",
+            jinja_env=jinja_env,
+            render_args={}
+        ),
+        TemplateFileStructure(
+            template_path="logic/handlers/relational/relational_utils_component.py.jinja",
+            generated_file_path=f"{src}/logic/handlers/handler_utils/utils_handler_component.py",
+            jinja_env=jinja_env,
+            render_args={}
+        ),
+        
     ]
     _write_templates(template_file_structure)
 
