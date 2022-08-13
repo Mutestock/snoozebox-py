@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 PG_CONFIG = CONFIG["database"]["postgres"]
 
-conn_string: str = f'postgresql+psycopg2://{{{PG_CONFIG["usr"]}}}:{{{PG_CONFIG["pwd"]}}}@{{{PG_CONFIG["host"]}}}:{{{PG_CONFIG["port"]}}}/{{{PG_CONFIG["db"]}}}'
+conn_string: str = f'postgresql+psycopg2://{PG_CONFIG["usr"]}:{PG_CONFIG["pwd"]}@{PG_CONFIG["host"]}:{PG_CONFIG["port"]}/{PG_CONFIG["db"]}'
 engine = create_engine(conn_string, pool_size=20, max_overflow=0)
 Base = declarative_base()
 

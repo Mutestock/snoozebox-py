@@ -1,5 +1,4 @@
 import os
-from typing import List
 from pipe import select
 from pathlib import Path
 import textwrap
@@ -44,6 +43,9 @@ def get_parent_of_root_services(config: dict) -> str:
     ).parent.absolute()
     return parent
 
+def get_docker_compose_file(config: dict) -> str:
+    return f"{get_parent_of_root_services(config)}/docker-compose.yml"
+
 
 def get_directories_with_sql_files(path_str: str) -> dict:
     directories_with_sql: dict = {}
@@ -72,3 +74,23 @@ def indent_writer(lvl: int, text: str, file_writer) -> None:
     for _ in range(lvl):
         indent_concat += " "
     file_writer.write(textwrap.indent(text=textwrap.dedent(text), prefix=indent_concat))
+
+
+
+def create_base_directories(config: dict) -> None:
+    create_directories_if_not_exists(
+        [
+            f"{get_relative_project_src_directory(config)}/{path_def[1]}"
+            for path_def in config["settings"]["file_structure"][
+                "project_directories"
+            ].values()
+        ]
+    )
+    create_directories_if_not_exists(
+        [
+            f"{get_relative_tests_directory(config)}/{path_def[1]}"
+            for path_def in config["settings"]["file_structure"][
+                "test_directories"
+            ].values()
+        ]
+    )

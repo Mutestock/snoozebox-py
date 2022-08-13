@@ -14,6 +14,7 @@ from gen.prompt import run_append_prompt
 from gen.gen_base import exec_gen
 from snoozelib import sql_tables_to_classes
 from snoozelib.conversion import Conversion
+from gen.templates_management import templating_prompt
 
 
 @click.group()
@@ -26,15 +27,10 @@ def manager():
     "--data-path",
     help="Configures the snoozefile to point to an already existing directory containing data",
 )
-def init(data_path):
+def init():
     create_directories_if_not_exists(["schematics", "services"])
     create_empty_files_if_not_exists(["snoozefile.toml", "docker-compose.yml"])
     generate_snoozefile()
-
-
-@manager.command()
-def generate():
-    pass
 
 
 @manager.command()
@@ -52,6 +48,12 @@ def translate(path):
         print(conversions)
     for conversion in conversions:
         print(conversion.contents)
+        
+@manager.command()
+def jinja():
+    print("This is just for testing purposes")
+    config: dict = run_append_prompt()
+    templating_prompt(config=config)
 
 
 @manager.command()
