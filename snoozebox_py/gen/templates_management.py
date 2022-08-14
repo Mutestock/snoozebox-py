@@ -12,6 +12,7 @@ from utils.pathing import (
 )
 from pprint import pprint
 
+
 @dataclass
 class TemplateFileStructure:
     template_path: str
@@ -143,7 +144,15 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
                     template_path="logic/handlers/grpc/grpc_handler.py.jinja",
                     generated_file_path=f"{src}/logic/handlers/{conversion.name.lower()}_handler.py",
                     jinja_env=jinja_env,
-                    render_args={"config": config, "schematic": conversion}
+                    render_args={"config": config, "schematic": conversion},
+                )
+            ),
+            template_file_structure.append(
+                TemplateFileStructure(
+                    template_path="service/grpc/grpc_routes_gen.py.jinja",
+                    generated_file_path=f"{src}/service/routes/{conversion.name.lower()}_routes.py",
+                    jinja_env=jinja_env,
+                    render_args={"config": config, "schematic": conversion},
                 )
             )
     _write_templates(template_file_structure)
@@ -160,6 +169,12 @@ def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
             generated_file_path=docker_compose,
             jinja_env=jinja_env,
             render_args={"config": config},
+        ),
+        TemplateFileStructure(
+            template_path="service/grpc/grpc_main_gen.py.jinja",
+            generated_file_path=f"{src}/service/grpc_main.py",
+            jinja_env=jinja_env,
+            render_args={"config": config, "schematics": config["schematics"]},
         ),
     ]
     _write_templates(template_file_structure)

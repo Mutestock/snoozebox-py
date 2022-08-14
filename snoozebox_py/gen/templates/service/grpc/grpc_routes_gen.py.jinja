@@ -5,38 +5,38 @@ from logic.handlers.{{schematic.name.lower()}}_handler import {{schematic.name.c
 class {{schematic.name.capitalize()}}Router({{schematic.name.capitalize()}}Servicer):
     {{schematic.name.lower()}}_handler: {{schematic.name.capitalize()}}Handler = {{schematic.name.capitalize()}}Handler()
 
-    {% if "create" in config["crud_instructions"] %}
+    {% if "create" in config["crud_instructions"] -%}
     def Create{{schematic.name.capitalize()}}(
         self, request: {{schematic.name.lower()}}_pb2.Create{{schematic.name.capitalize()}}Request, _
     ) -> {{schematic.name.lower()}}_pb2.Create{{schematic.name.capitalize()}}Response:
         return self.{{schematic.name.lower()}}_handler.create(request)  
-    {% endif %}
+    {%- endif %}
 
-    {% if "read" in config["crud_instructions"] %}
+    {% if "read" in config["crud_instructions"] -%}
     def Read{{schematic.name.capitalize()}}(
         self, request: {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}Request, _
     ) -> {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}Response:
         return self.{{schematic.name.lower()}}_handler.read(request)
-    {% endif %}
+    {%- endif %}
 
-    {% if "update" in config["crud_instructions"] %}
+    {% if "update" in config["crud_instructions"] -%}
     def Update{{schematic.name.capitalize()}}(
         self, request: {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Request, _
     ) -> {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Response:
         return self.{{schematic.name.lower()}}_handler.update(request)
-    {% endif %}
+    {%- endif %}
 
-    {% if "delete" in config["crud_instructions"] %}
+    {% if "delete" in config["crud_instructions"] -%}
     def Delete{{schematic.name.capitalize()}}(
         self, request: {{schematic.name.lower()}}_pb2.Delete{{schematic.name.capitalize()}}Request, _
     ) -> {{schematic.name.lower()}}_pb2.Delete{{schematic.name.capitalize()}}Request:
         return self.{{schematic.name.lower()}}_handler.delete(request)
-    {% endif %}
+    {%- endif %}
 
-    {% if "read_list" in config["crud_instructions"] %}
+    {% if "read_list" in config["crud_instructions"] -%}
     def Read{{schematic.name.capitalize()}}List(
         self, request: {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}ListRequest, _
     ) -> {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}ListRequest:
         return self.{{schematic.name.lower()}}_handler.read_list(request)
-    {% endif %}
+    {%- endif %}
 
