@@ -39,10 +39,10 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     run_poetry(config)
     poetry_export_requirements(config)
     create_base_directories(config)
+    _set_crud_instructions(config)
     _run_base_templates(config, jinja_env)
     _determine_and_run_service_templates(config, jinja_env)
     _determine_and_run_database_templates(config, jinja_env)
-    pprint(config)
 
 
 def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -> None:
@@ -130,13 +130,20 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
     ]
     for schematic in config["schematics"]:
         for conversion in schematic:
-            print(conversion.sorted_import_instructions)
             template_file_structure.append(
                 TemplateFileStructure(
                     template_path="model/pg_model.py.jinja",
-                    generated_file_path=f"{src}/models/{conversion.name}.py",
+                    generated_file_path=f"{src}/models/{conversion.name.lower()}.py",
                     jinja_env=jinja_env,
                     render_args={"config": config, "schematic": conversion},
+                )
+            )
+            template_file_structure.append(
+                TemplateFileStructure(
+                    template_path="logic/handlers/grpc/grpc_handler.py.jinja",
+                    generated_file_path=f"{src}/logic/handlers/{conversion.name.lower()}_handler.py",
+                    jinja_env=jinja_env,
+                    render_args={"config": config, "schematic": conversion}
                 )
             )
     _write_templates(template_file_structure)
@@ -156,3 +163,36 @@ def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
         ),
     ]
     _write_templates(template_file_structure)
+
+
+def _set_crud_instructions(config: dict) -> None:
+    database: str = config["database"]
+    config["crud_instructions"] = []
+
+    # Match hasn't been added in earlier Python versions
+    if database == "Postgres":
+        config["crud_instructions"] = [
+            "create",
+            "read",
+            "update",
+            "delete",
+            "read_list",
+        ]
+    elif database == "MongoDB":
+        config["crud_instructions"] = [
+            "create",
+            "read",
+            "update",
+            "delete",
+            "read_list",
+        ]
+    elif database == "Cassandra":
+        config["crud_instructions"] = [
+            "create",
+            "read",
+            "update",
+            "delete",
+            "read_list",
+        ]
+    else:
+        print("Chosen database wasn't found. This should never happen")
