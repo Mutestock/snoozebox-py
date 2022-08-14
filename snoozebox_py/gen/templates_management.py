@@ -10,7 +10,7 @@ from utils.pathing import (
     get_docker_compose_file,
     create_base_directories,
 )
-
+from pprint import pprint
 
 @dataclass
 class TemplateFileStructure:
@@ -42,6 +42,7 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     _run_base_templates(config, jinja_env)
     _determine_and_run_service_templates(config, jinja_env)
     _determine_and_run_database_templates(config, jinja_env)
+    pprint(config)
 
 
 def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -> None:
@@ -112,22 +113,32 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
             template_path="logic/handlers/relational/generic_tools.py.jinja",
             generated_file_path=f"{src}/logic/generic_tools.py",
             jinja_env=jinja_env,
-            render_args={}
+            render_args={},
         ),
         TemplateFileStructure(
             template_path="logic/handlers/relational/relational_crud_component.py.jinja",
             generated_file_path=f"{src}/logic/handlers/handler_utils/crud_handler_component.py",
             jinja_env=jinja_env,
-            render_args={}
+            render_args={},
         ),
         TemplateFileStructure(
             template_path="logic/handlers/relational/relational_utils_component.py.jinja",
             generated_file_path=f"{src}/logic/handlers/handler_utils/utils_handler_component.py",
             jinja_env=jinja_env,
-            render_args={}
+            render_args={},
         ),
-        
     ]
+    for schematic in config["schematics"]:
+        for conversion in schematic:
+            print(conversion.sorted_import_instructions)
+            template_file_structure.append(
+                TemplateFileStructure(
+                    template_path="model/pg_model.py.jinja",
+                    generated_file_path=f"{src}/models/{conversion.name}.py",
+                    jinja_env=jinja_env,
+                    render_args={"config": config, "schematic": conversion},
+                )
+            )
     _write_templates(template_file_structure)
 
 

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from snoozelib.import_instruction import ImportInstruction
 from snoozelib.grpc_variable import GrpcVariable
 import textwrap
+
+from .import_instruction import SortedInstruction
 
 
 @dataclass
@@ -10,6 +12,7 @@ class Conversion:
     name: Optional[str] = None
     contents: Optional[str] = None
     import_instructions: Optional[List[ImportInstruction]] = None
+    sorted_import_instructions: Optional[List[SortedInstruction]] = None
     variable_names: Optional[str] = None
     grpc_variables: Optional[GrpcVariable] = None
 
@@ -26,7 +29,7 @@ class Conversion:
         for key, value in instructions_sorted.items():
             suffix: str = ", ".join(value)
             res += f"from {key} import {suffix}"
-            
+
         content_list = [content for content in self.contents.split("\n") if content]
 
         res += textwrap.dedent(
@@ -52,3 +55,27 @@ class Conversion:
                     or dependency.import_name != current_dependency.import_name
                 ):
                     self.import_instructions.append(dependency)
+
+    def finalize_sorted_instructions(self) -> None:
+        for instruction in self.import_instructions:
+            hit: bool = False
+            if not self.sorted_import_instructions:
+                self.sorted_import_instructions = [
+                    SortedInstruction.from_import_instruction(instruction)
+                ]
+                continue
+            for sorted_instruction in self.sorted_import_instructions:
+                if (
+                    sorted_instruction.origin == instruction.origin
+                ):
+                    if instruction.import_name not in sorted_instruction.imports:
+                        sorted_instruction.imports.append(instruction.import_name)
+                    hit = True
+                    continue
+            if hit:
+                continue
+
+            else:
+                self.sorted_import_instructions.append(
+                    SortedInstruction.from_import_instruction(instruction)
+                )

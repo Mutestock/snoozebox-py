@@ -1,4 +1,6 @@
+from typing import List
 from snoozelib import _determine_type_for_grpc, sql_tables_to_classes
+from snoozelib.conversion import Conversion
 import textwrap
 
 
@@ -48,6 +50,22 @@ def test_grpc_types():
     """)
     actual = sql_tables_to_classes(sql)
     
+
+def test_conversion_sorted_instructions_has_multiple_values():
+    sql: str = textwrap.dedent(f"""\
+    CREATE TABLE contains_unique(
+        id SERIAL NOT NULL,
+        whatever VARCHAR(255) UNIQUE NOT NULL
+    );   
+    """)
+    res: List[Conversion] = sql_tables_to_classes(sql)
+    hit_of_over_one_vars: bool = False
+    for conversion in res:
+        for sorted_instruction in conversion.sorted_import_instructions:
+            if len(sorted_instruction.imports) > 1:
+                hit_of_over_one_vars = True
+                print(sorted_instruction)
+    assert hit_of_over_one_vars == True
     
     
 if __name__ == "__main__":
@@ -60,7 +78,6 @@ if __name__ == "__main__":
     """)
     actual = sql_tables_to_classes(sql)
     print(actual[0].grpc_variables)
-    #garbage()
     sql_split = sql.split(",")
     for line in sql_split:
         line = line.lower()

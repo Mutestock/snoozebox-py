@@ -1,32 +1,26 @@
 from connection.postgres_connection import Base
-{% if config["service"] == "gRPC "%}
-from protogen import {{schematic.name.lower()}}_pb2
-{% endif %}
+{% if config["service"].lower() == "grpc"-%}
+from protogen import {{ schematic.name.lower() }}_pb2
+{%- endif %}
+
+{% for sorted_import_instruction in schematic.sorted_import_instructions -%}
+from {{sorted_import_instruction.origin}} import {% for import_ in sorted_import_instruction.imports %}{{ import_ }}{% if loop.index != loop.length %}, {% endif %}{% endfor %}
+{%- endfor %}
 
 class {{ schematic.name.capitalize() }}:
-
     {% if config["service"] == "gRPC" %}
-
     def __init__(
         self,
-        {% for variable_name in schematic.variable_names %}
-        {{ variable_name }} = None,
-        {% endfor %}
+        {% for variable_name in schematic.variable_names %}{{ variable_name }} = None, {% endfor %}
         grpc_{{schematic.name.lower()}}_object: {{schematic.name.lower()}}_pb2.New{{schematic.name.capitalize()}}Object = None
     ) -> None:
         if grpc_{{schematic.name.lower()}}_object:
-            {% for variable_name in schematic.variable_names %}
-            self.{{variable_name}} = grpc_{{schematic.name.lower()}}_channel_object.{{variable_name}},
-            {% endfor %}
+            {% for variable_name in schematic.variable_names %}self.{{variable_name}} = grpc_{{schematic.name.lower()}}_channel_object.{{variable_name}},{% endfor %}
         else:
-            {% for variable_name in schematic.variable_names %}
-            self.{{variable_name}} = {{ variable_name }},
-            {% endfor %}
+            {% for variable_name in schematic.variable_names %}self.{{variable_name}} = {{ variable_name }},{% endfor %}
     
     def to_grpc_object(self) -> {{schematic.name.lower()}}_pb2.{{schematic.name.capitalize()}}Object:
         return {{schematic.name.lower()}}_pb2.{{schematic.name.capitalize()}}Object(
-            {% for variable_name in schematic.variable_names %}
-            {{variable_name}}=self.{{variable_name}},
-            {% endfor%}
+            {% for variable_name in schematic.variable_names %}{{variable_name}}=self.{{variable_name}},{% endfor %}
         )
     {% endif %}

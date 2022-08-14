@@ -163,4 +163,5 @@ def _make_class_def(sql: str) -> Conversion:
         else:
             conversion.contents += code
     conversion.resolve_contents()
+    conversion.finalize_sorted_instructions()
     return conversion
