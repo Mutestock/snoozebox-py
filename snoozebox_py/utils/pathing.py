@@ -1,4 +1,5 @@
 import os
+from typing import List
 from pipe import select
 from pathlib import Path
 import textwrap
@@ -94,3 +95,13 @@ def create_base_directories(config: dict) -> None:
             ].values()
         ]
     )
+
+
+def create_mode_specific_directories(config: dict) -> None:
+    directories: List[str] = {
+        "rest": [],
+        "grpc": [f"{get_relative_project_root_directory(config)}/proto"],
+        "kafka": [],
+        "rabbitmq": [],
+    }.get(config["service"].lower())
+    create_directories_if_not_exists(directories)

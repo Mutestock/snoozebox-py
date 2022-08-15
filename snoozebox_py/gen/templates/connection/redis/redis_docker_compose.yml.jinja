@@ -1,11 +1,13 @@
-        {{config["project_name"]}}_cache:
-          container_name: {{config["project_name"]}}_cache
-          image: redis:latest
-          restart: always
-          ports:
-            - {{config['settings']['database']['redis']['port']}}:6379
-          command: redis-server --save 20 1 --loglevel warning --requirepass {{config["settings"]["database"]["redis"]["pwd"]}}
-          volumes:
-            - ./data/redis:/data 
-          networks:
-            - {{config["settings"]["docker_compose_network"]}}
+
+  {{config["project_name"]}}_cache:
+    container_name: {{config["project_name"]}}_cache
+    image: redis:latest
+    restart: always
+    ports:
+      - {{config['settings']['database']['redis']['port']}}:6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass {{config["settings"]["database"]["redis"]["pwd"]}}
+    volumes:
+      - ./data/redis:/data 
+    networks:
+      - {{config['settings']['docker_compose_network']}}
+

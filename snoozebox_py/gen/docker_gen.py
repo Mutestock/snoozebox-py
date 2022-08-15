@@ -41,7 +41,7 @@ def _docker_compose_append_content(config: dict, content: str) -> None:
     file_writer.close()
 
 
-def _get_apt_dependencies(config: dict) -> str:
+def get_apt_dependencies(config: dict) -> str:
     database_settings: dict = config["settings"]["database"]
     server_settings: dict = config["settings"]["server"]
 
@@ -69,7 +69,7 @@ def grpc_dockerfile(config: dict) -> None:
             COPY . /app
             WORKDIR /app
             RUN apt-get update
-            RUN apt-get install {" ".join(_get_apt_dependencies(config))} -y
+            RUN apt-get install {" ".join(get_apt_dependencies(config))} -y
             RUN pip install -r requirements.txt
             EXPOSE {config["settings"]["server"]["grpc"]["port"]}
             CMD ["python", "{config["project_name"]}/main.py"]

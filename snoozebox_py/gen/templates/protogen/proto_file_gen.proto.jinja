@@ -3,28 +3,25 @@ package {{schematic.name.lower()}};
 
 service {{schematic.name.capitalize()}}{
     {% if "create" in config["crud_instructions"] -%}
-    rpc Create{{schematic.name.capitalize()}}(Create{{schematic.name.capitalize()}}Request) returns (Create{{schematic.name.capitalize()}}Response) {%raw%}{{}}{%endraw%}
+    rpc Create{{schematic.name.capitalize()}}(Create{{schematic.name.capitalize()}}Request) returns (Create{{schematic.name.capitalize()}}Response) {}
     {%- endif %}
-
-    {% if "read" in config["crud_instruction"] -%}
-    rpc Read{{schematic.name.capitalize()}}(Read{{schematic.name.capitalize()}}Request) returns (Read{{schematic.name.capitalize()}}Response) {%raw%}{{}}{%endraw%}
+    {% if "read" in config["crud_instructions"] -%}
+    rpc Read{{schematic.name.capitalize()}}(Read{{schematic.name.capitalize()}}Request) returns (Read{{schematic.name.capitalize()}}Response) {}
     {%- endif %}
-
-    {% if "update" in config["crud_instruction"] -%}
-    rpc Update{{schematic.name.capitalize()}}(Update{{schematic.name.capitalize()}}Request) returns (Update{{schematic.name.capitalize()}}Response) {%raw%}{{}}{%endraw%}
+    {% if "update" in config["crud_instructions"] -%}
+    rpc Update{{schematic.name.capitalize()}}(Update{{schematic.name.capitalize()}}Request) returns (Update{{schematic.name.capitalize()}}Response) {}
     {%- endif %}
-
-    {% if "delete" in config["crud_instruction"] -%}
-    rpc Delete{{schematic.name.capitalize()}}(Delete{{schematic.name.capitalize()}}Request) returns (Delete{{schematic.name.capitalize()}}Response) {%raw%}{{}}{%endraw%}
+    {% if "delete" in config["crud_instructions"] -%}
+    rpc Delete{{schematic.name.capitalize()}}(Delete{{schematic.name.capitalize()}}Request) returns (Delete{{schematic.name.capitalize()}}Response) {}
     {%- endif %}
-
-    {% if "read_list" in config["crud_instruction"] -%}
-    rpc Read{{schematic.name.capitalize()}}List(Read{{schematic.name.capitalize()}}ListRequest) returns (Read{{schematic.name.capitalize()}}ListResponse) {%raw%}{{}}{%endraw%}
+    {% if "read_list" in config["crud_instructions"] -%}
+    rpc Read{{schematic.name.capitalize()}}List(Read{{schematic.name.capitalize()}}ListRequest) returns (Read{{schematic.name.capitalize()}}ListResponse) {}
     {%- endif %}
 }
 
 
-===================== Utils ========================
+//===================== Utils ========================
+
 message {{schematic.name.capitalize()}}Object {
     {% for grpc_variable in schematic.grpc_variables: -%}
     {{grpc_variable.var_type}} {{grpc_variable.var_name}} = {{loop.index}};
@@ -40,75 +37,60 @@ message New{{schematic.name.capitalize()}}Object{
 }
 
 
-===================== Request ======================
+//===================== Request ======================
 
 {% if "create" in config["crud_instructions"] -%}
 message Create{{schematic.name.capitalize()}}Request { 
     New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 1;
 }
-{% endif %}
-
+{%- endif %}
 {% if "read" in config["crud_instructions"] -%}
 message Read{{schematic.name.capitalize()}}Request { 
     int32 id = 1; 
 }
-{% endif %}
-
-
+{%- endif %}
 {% if "update" in config["crud_instructions"] -%}
 message Update{{schematic.name.capitalize()}}Request {  
     int32 id = 1;  
     New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 2;
 }
-{% endif %}
-
-
+{%- endif %}
 {% if "delete" in config["crud_instructions"] -%}
 message Delete{{schematic.name.capitalize()}}Request {
     int32 id = 1; 
 }
-{% endif %}
-
-
+{%- endif %}
 {% if "read_list" in config["crud_instructions"] -%}
-message Read{{schematic.name.capitalize()}}ListRequest { }"
-{% endif %}
+message Read{{schematic.name.capitalize()}}ListRequest { }
+{%- endif %}
 
-
-===================== Response =====================
+//===================== Response =====================
 
 {% if "create" in config["crud_instructions"] -%}
 message Create{{schematic.name.capitalize()}}Response { 
     string msg = 1; 
 }
-{% endif %}
-
+{%- endif %}
 {% if "read" in config["crud_instructions"] -%}
 message Read{{schematic.name.capitalize()}}Response {
     New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 1;
     string msg = 2;
 }
-{% endif %}
-
-
+{%- endif %}
 {% if "update" in config["crud_instructions"] -%}
 message Update{{schematic.name.capitalize()}}Response {
     int32 id = 1;
-    {_new_object_name()} = 2;
+    New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 2;
 }
-{% endif %}
-
-
+{%- endif %}
 {% if "delete" in config["crud_instructions"] -%}
 message Delete{{schematic.name.capitalize()}}Response { 
     string msg = 1; 
 }
-{% endif %}
-
-
+{%- endif %}
 {% if "read_list" in config["crud_instructions"] -%}
 message Read{{schematic.name.capitalize()}}ListResponse {
     repeated New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 1;
     string msg = 2;
 }
-{% endif %}
+{%- endif %}

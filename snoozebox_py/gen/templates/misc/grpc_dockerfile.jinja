@@ -1,0 +1,8 @@
+FROM python:3.9-slim
+COPY . /app
+WORKDIR /app
+RUN apt-get update
+RUN apt-get install {{apt_dependencies}} -y
+RUN pip install -r requirements.txt
+EXPOSE {{config["settings"]["server"]["grpc"]["port"]}}
+CMD ["python", "{{config["project_name"]}}/main.py"]

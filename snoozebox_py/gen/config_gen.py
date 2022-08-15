@@ -6,6 +6,7 @@ from utils.pathing import (
     get_relative_project_src_directory,
 )
 import rtoml
+from pipe import select
 
 
 class ConfigWriter(BlockWriter):
@@ -81,7 +82,43 @@ class ConfigWriter(BlockWriter):
 def dict_recurse_define(base: dict, keys: List[str]) -> None:
     key_to_append = keys[0]
     if not base.get(key_to_append):
-        base[key_to_append] = {}
-    keys.remove(key_to_append)
+        base[key_to_append] = {}select
     if len(keys) > 0:
         dict_recurse_define(base=base[key_to_append], keys=keys)
+
+
+def write_config(config: dict) -> None:
+    def mode_write(config: dict, mode: str) -> None:
+        service: str = config["service"]
+        database: str = config["database"]
+
+        dict_recurse_define(
+            config, ["relative_config_toml"], mode, "database", database
+        )
+        dict_recurse_define(config, ["relative_config_toml"], mode, "service", service)
+        dict_recurse_define(config, ["relative_config_toml"], mode, "database", "rselect
+        config["relative_config_toml"][mode]["database"][database]["host"] = config[
+            "settings"
+        ]["database"][database]["host"]
+
+        # Database
+        config["relative_config_toml"][mode]["database"][database]["port"] = config[
+            "settings"
+        ]["database"][database]["port"]select
+
+        config["relative_config_toml"][mode]["database"][database]["usr"] = config[
+            "settings"
+        ]["database"][database]["usr"]
+
+        config["relative_config_toml"][mode]["database"][database]["pwd"] = configselect[
+            "settings"
+        ]["database"][database]["pwd"]
+
+        config["relative_config_toml"][mode]["database"][database]["db"] = config[
+            "settings"
+        ]["database"][database]["db"]
+        
+        # Service
+        
+        
+    list(["local", "test"] | select(lambda x: mode_write(config, x)))

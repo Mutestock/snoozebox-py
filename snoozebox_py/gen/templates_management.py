@@ -3,14 +3,18 @@ from io import TextIOWrapper
 from typing import List
 from jinja2 import Environment, PackageLoader, select_autoescape
 from gen.gen_base import _collect_dependencies
+from .docker_gen import get_apt_dependencies
 from utils.poetry_exec import run_poetry, poetry_export_requirements
 from utils.pathing import (
+    create_mode_specific_directories,
+    get_relative_project_root_directory,
     get_relative_project_src_directory,
     get_relative_tests_directory,
     get_docker_compose_file,
     create_base_directories,
 )
-from pprint import pprint
+from gen.gitignore_gen import write_git_ignore
+from pipe import where
 
 
 @dataclass
@@ -40,11 +44,13 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     run_poetry(config)
     poetry_export_requirements(config)
     create_base_directories(config)
+    create_mode_specific_directories(config)
     _set_crud_instructions(config)
     _run_base_templates(config, jinja_env)
     _run_redis_templates(config, jinja_env)
     _determine_and_run_service_templates(config, jinja_env)
     _determine_and_run_database_templates(config, jinja_env)
+    write_git_ignore(config)
 
 
 def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -> None:
@@ -58,6 +64,7 @@ def _determine_and_run_database_templates(config: dict, jinja_env: Environment) 
         config["database"].lower()
     )(config, jinja_env)
 
+    
 
 def _write_templates(template_file_structure: List[TemplateFileStructure]) -> None:
     for template_file in template_file_structure:
@@ -88,10 +95,11 @@ def _run_base_templates(config: dict, jinja_env: Environment) -> None:
             template_path="utils/config_interp.py.jinja",
             generated_file_path=f"{src}/utils/config.py",
             jinja_env=jinja_env,
-            render_args={}
-        )
+            render_args={},
+        ),
     ]
     _write_templates(template_file_structure)
+
 
 def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
     src: str = get_relative_project_src_directory(config)
@@ -108,16 +116,17 @@ def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
             template_path="connection/redis/redis_test.py.jinja",
             generated_file_path=f"{test_dir}/test_connection/test_redis_connection.py",
             jinja_env=jinja_env,
-            render_args={}
+            render_args={},
         ),
         TemplateFileStructure(
             template_path="connection/redis/redis_docker_compose.yml.jinja",
             generated_file_path=docker_compose,
             jinja_env=jinja_env,
-            render_args={"config": config}
-        )
+            render_args={"config": config},
+        ),
     ]
     _write_templates(template_file_structure)
+
 
 def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
     src: str = get_relative_project_src_directory(config)
@@ -172,6 +181,44 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
                     render_args={"config": config, "schematic": conversion},
                 )
             )
+    _write_templates(template_file_structure)
+
+
+def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
+    src: str = get_relative_project_src_directory(config)
+    docker_compose: str = get_docker_compose_file(config)
+    root: str = get_relative_project_root_directory(config)
+    dockerfile = f"{root}/Dockerfile"
+    
+
+    template_file_structure: List[TemplateFileStructure] = [
+        TemplateFileStructure(
+            template_path="service/grpc/grpc_docker_compose.yml.jinja",
+            generated_file_path=docker_compose,
+            jinja_env=jinja_env,
+            render_args={"config": config},
+        ),
+        TemplateFileStructure(
+            template_path="service/grpc/grpc_main_gen.py.jinja",
+            generated_file_path=f"{src}/service/grpc_main.py",
+            jinja_env=jinja_env,
+            render_args={"config": config, "schematics": config["schematics"]},
+        ),
+        TemplateFileStructure(
+            template_path="protogen/protogen.sh.jinja",
+            generated_file_path=f"{root}/protogen.sh",
+            jinja_env=jinja_env,
+            render_args={"config": config}
+        ),
+        TemplateFileStructure(
+            template_path="misc/grpc_dockerfile.jinja",
+            generated_file_path=dockerfile,
+            jinja_env=jinja_env,
+            render_args={"config": config, "apt_dependencies": " ".join(get_apt_dependencies(config))}       
+        )
+    ]
+    for schematic in config["schematics"]:
+        for conversion in schematic:
             template_file_structure.append(
                 TemplateFileStructure(
                     template_path="logic/handlers/grpc/grpc_handler.py.jinja",
@@ -188,28 +235,22 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
                     render_args={"config": config, "schematic": conversion},
                 )
             )
-    _write_templates(template_file_structure)
+            template_file_structure.append(
+                TemplateFileStructure(
+                    template_path="protogen/proto_file_gen.proto.jinja",
+                    generated_file_path=f"{root}/proto/{conversion.name.lower()}.proto",
+                    jinja_env=jinja_env,
+                    render_args={
+                        "config": config,
+                        "schematic": conversion,
+                        "non_default_variables": list(
+                            conversion.grpc_variables
+                            | where(lambda x: x.default == False)
+                        ),
+                    },
+                )
+            )
 
-
-def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
-    src: str = get_relative_project_src_directory(config)
-    docker_compose: str = get_docker_compose_file(config)
-    test_dir: str = get_relative_tests_directory(config)
-
-    template_file_structure: List[TemplateFileStructure] = [
-        TemplateFileStructure(
-            template_path="service/grpc/grpc_docker_compose.yml.jinja",
-            generated_file_path=docker_compose,
-            jinja_env=jinja_env,
-            render_args={"config": config},
-        ),
-        TemplateFileStructure(
-            template_path="service/grpc/grpc_main_gen.py.jinja",
-            generated_file_path=f"{src}/service/grpc_main.py",
-            jinja_env=jinja_env,
-            render_args={"config": config, "schematics": config["schematics"]},
-        ),
-    ]
     _write_templates(template_file_structure)
 
 
