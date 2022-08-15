@@ -1,0 +1,14 @@
+#!/bin/bash
+echo "generating gRPC..."
+proto_dir=proto
+for entry in "$proto_dir"/*
+do
+{%raw%}
+    proto_name="$(basename $entry)"
+    proto_name="${{proto_name%.*}}"
+    echo "found ${{proto_name}}..."
+{%endraw%}
+    python -m grpc_tools.protoc -I./proto --python_out=./{{config["project_name"]}}/protogen --grpc_python_out=./{{config["project_name"]}}/protogen $entry
+    sed -i "s/import ${{proto_name}}_pb2 as ${{proto_name}}__pb2/import protogen.${{proto_name}}_pb2 as ${{proto_name}}__pb2/g" "./{{config["project_name"]}}/protogen/${{proto_name}}_pb2_grpc.py"
+done
+echo "done"       

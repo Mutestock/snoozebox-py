@@ -7,7 +7,7 @@ from logic.handlers.handler_utils.utils_handler_component import (
 from protogen import {{schematic.name.lower()}}_pb2
 from logic.handlers.handler_utils.generic_tools import(
     SUCCESFUL_TRANSACTION,
-    make_error_emssage,
+    make_error_message,
 )
 from models.{{schematic.name.lower()}} import {{schematic.name.capitalize()}}
 from pipe import map
@@ -29,7 +29,7 @@ class {{schematic.name.capitalize()}}Handler:
         except Exception as ex:
             logging.error(
                 f"{{schematic.name.capitalize()}} create failed. Error: {ex}, type = {type(ex)}"
-            )01
+            )
             return {{schematic.name.lower()}}_pb2.Create{{schematic.name.capitalize()}}Response(
                 msg=make_error_message(ex) + " " + str(request)
             )
@@ -87,6 +87,6 @@ class {{schematic.name.capitalize()}}Handler:
                 msg=SUCCESFUL_TRANSACTION,
             )
         except Exception as ex:
-            logging.error(f"{{schematic.name.capitalize()}} read list failed: Error: {ex}, type = {type(ex)")
+            logging.error(f"{{schematic.name.capitalize()}} read list failed: Error: {ex}, type = {type(ex)}")
             return {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}ListResponse(msg=make_error_message(ex))
     {% endif %}

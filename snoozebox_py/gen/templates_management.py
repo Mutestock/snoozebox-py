@@ -42,6 +42,7 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     create_base_directories(config)
     _set_crud_instructions(config)
     _run_base_templates(config, jinja_env)
+    _run_redis_templates(config, jinja_env)
     _determine_and_run_service_templates(config, jinja_env)
     _determine_and_run_database_templates(config, jinja_env)
 
@@ -74,6 +75,7 @@ def _write_templates(template_file_structure: List[TemplateFileStructure]) -> No
 
 
 def _run_base_templates(config: dict, jinja_env: Environment) -> None:
+    src: str = get_relative_project_src_directory(config)
     docker_compose: str = get_docker_compose_file(config)
     template_file_structure: List[TemplateFileStructure] = [
         TemplateFileStructure(
@@ -81,10 +83,41 @@ def _run_base_templates(config: dict, jinja_env: Environment) -> None:
             generated_file_path=docker_compose,
             jinja_env=jinja_env,
             render_args={"config": config},
+        ),
+        TemplateFileStructure(
+            template_path="utils/config_interp.py.jinja",
+            generated_file_path=f"{src}/utils/config.py",
+            jinja_env=jinja_env,
+            render_args={}
         )
     ]
     _write_templates(template_file_structure)
 
+def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
+    src: str = get_relative_project_src_directory(config)
+    test_dir: str = get_relative_tests_directory(config)
+    docker_compose: str = get_docker_compose_file(config)
+    template_file_structure: List[TemplateFileStructure] = [
+        TemplateFileStructure(
+            template_path="connection/redis/redis_gen.py.jinja",
+            generated_file_path=f"{src}/connection/redis_connection.py",
+            jinja_env=jinja_env,
+            render_args={},
+        ),
+        TemplateFileStructure(
+            template_path="connection/redis/redis_test.py.jinja",
+            generated_file_path=f"{test_dir}/test_connection/test_redis_connection.py",
+            jinja_env=jinja_env,
+            render_args={}
+        ),
+        TemplateFileStructure(
+            template_path="connection/redis/redis_docker_compose.yml.jinja",
+            generated_file_path=docker_compose,
+            jinja_env=jinja_env,
+            render_args={"config": config}
+        )
+    ]
+    _write_templates(template_file_structure)
 
 def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
     src: str = get_relative_project_src_directory(config)
@@ -112,7 +145,7 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
         ),
         TemplateFileStructure(
             template_path="logic/handlers/relational/generic_tools.py.jinja",
-            generated_file_path=f"{src}/logic/generic_tools.py",
+            generated_file_path=f"{src}/logic/handlers/handler_utils/generic_tools.py",
             jinja_env=jinja_env,
             render_args={},
         ),
