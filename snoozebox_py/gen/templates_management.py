@@ -3,6 +3,7 @@ from io import TextIOWrapper
 from typing import List
 from jinja2 import Environment, PackageLoader, select_autoescape
 from gen.gen_base import _collect_dependencies
+from .config_gen import write_config
 from .docker_gen import get_apt_dependencies
 from utils.poetry_exec import run_poetry, poetry_export_requirements
 from utils.pathing import (
@@ -51,6 +52,7 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     _determine_and_run_service_templates(config, jinja_env)
     _determine_and_run_database_templates(config, jinja_env)
     write_git_ignore(config)
+    write_config(config)
 
 
 def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -> None:
