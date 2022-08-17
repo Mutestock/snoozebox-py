@@ -61,7 +61,7 @@ def describe_sql(path, translate):
         path = os.getcwd()
     if not Path(path).is_dir():
         sys.exit("Path is not a directory. Please point to the schematics directory.")
-    directories = get_directories_with_sql_files(path)
+    directories = get_directories_with_sql_files(Path(path))
     print(directories)
     if translate:
         for file_lists in directories.values():

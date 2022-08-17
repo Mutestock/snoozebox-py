@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "snoozelib"
-version = "0.0.0a10"
+version = "0.0.0a12"
 description = "Library for snoozebox CLI tool"
 authors = ["mutestock"]
 license="MIT"

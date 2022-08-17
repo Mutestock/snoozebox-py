@@ -4,6 +4,12 @@
 
 This is a CLI tool which creates services from data structures. A variety of databases and services are supported. For example, if you want a gRPC service with postgres, then you supply the cli tool with an .sql file with a "create table xyz" inside the schematics folder. The tool will then generate a basic application with some CRUD routes. Tests included.
 
+## Pre-usage
+
+If I haven't uploaded snoozelib to pypi yet(lack of confidense in project quality), then you need to build snoozelib first. In snoozelib directory:
+
+> poetry build
+
 ## Usage
 
 1. Open a terminal and cd to the directory you want to work in

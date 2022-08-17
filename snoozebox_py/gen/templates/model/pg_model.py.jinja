@@ -8,28 +8,34 @@ from {{sorted_import_instruction.origin}} import {% for import_ in sorted_import
 {%- endfor %}
 
 class {{ schematic.name.capitalize() }}:
-    {% if config["service"] == "gRPC" %}
+    __tablename__: str = {{ schematic.name.lower() }}
+
+    {% for content in schematic.contents %}
+    {{ content }}
+    {%- endfor %}
+
+    {% if config["service"] == "gRPC" -%}
     def __init__(
         self,
-        {% for variable_name in schematic.variable_names -%}
+        {%- for variable_name in schematic.variable_names %}
         {{ variable_name }} = None, 
         {%- endfor %}
         grpc_{{schematic.name.lower()}}_object: {{schematic.name.lower()}}_pb2.New{{schematic.name.capitalize()}}Object = None
     ) -> None:
         if grpc_{{schematic.name.lower()}}_object:
-            {% for variable_name in schematic.variable_names -%}
+            {%- for variable_name in schematic.variable_names %}
             self.{{variable_name}} = grpc_{{schematic.name.lower()}}_object.{{variable_name}}
-            {% endfor %}
+            {%- endfor %}
         else:
-            {% for variable_name in schematic.variable_names -%}
+            {%- for variable_name in schematic.variable_names %}
             self.{{variable_name}} = {{ variable_name }}
-            {% endfor %}
+            {%- endfor %}
     
     def to_grpc_object(self) -> {{schematic.name.lower()}}_pb2.{{schematic.name.capitalize()}}Object:
         return {{schematic.name.lower()}}_pb2.{{schematic.name.capitalize()}}Object(
-            {% for variable_name in schematic.variable_names -%}
+            {%- for variable_name in schematic.variable_names %}
             {{variable_name}}=self.{{variable_name}},
-            {% endfor %}
+            {%- endfor %}
         )
     {% endif %}
     

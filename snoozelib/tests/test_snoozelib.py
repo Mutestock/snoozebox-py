@@ -12,8 +12,10 @@ def test_translation():
     );
     """)
     actual = sql_tables_to_classes(sql)
-    expected = 'from sqlalchemy import Integer, Column, String\n\nclass Whatevs(Base):\n    __tablename__: str = "whatevs"\n\n\n    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)\n    stuff = Column(String(255), nullable=False)\n'
-    assert actual[0].resolve_contents() == expected
+    expected1 = 'id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)'
+    expected2 = 'stuff = Column(String(255), nullable=False)'
+    assert expected1 in actual[0].contents[0]
+    assert expected2 in actual[0].contents[1]
     
     
 def test_table_name_contains_keywords():
@@ -26,8 +28,7 @@ def test_table_name_contains_keywords():
     );   
     """)
     actual = sql_tables_to_classes(sql)
-    assert 'class Cereal(Base):' in actual[0].resolve_contents()
-    assert '__tablename__: str = "cereal' in actual[0].resolve_contents()
+    assert 'nullable=False' in actual[0].contents[0]
     
     
 def test_unique_gets_added():
@@ -38,7 +39,7 @@ def test_unique_gets_added():
     );   
     """)
     actual = sql_tables_to_classes(sql)
-    assert "unique=True" in actual[0].resolve_contents()
+    assert "unique=True" in actual[0].contents[1]
     
     
 def test_grpc_types():
@@ -67,18 +68,18 @@ def test_conversion_sorted_instructions_has_multiple_values():
                 print(sorted_instruction)
     assert hit_of_over_one_vars == True
     
-    
-if __name__ == "__main__":
-    
+def test_no_new_lines():
     sql: str = textwrap.dedent(f"""\
-    CREATE TABLE whatevs IF NOT EXISTS(
+    CREATE TABLE contains_unique(
         id SERIAL NOT NULL,
-        stuff VARCHAR(255) NOT NULL
-    );
+        whatever VARCHAR(255) UNIQUE NOT NULL
+    );   
     """)
-    actual = sql_tables_to_classes(sql)
-    print(actual[0].grpc_variables)
-    sql_split = sql.split(",")
-    for line in sql_split:
-        line = line.lower()
-        print(_determine_type_for_grpc(line))
+    res: List[Conversion] = sql_tables_to_classes(sql)
+    hit: bool = False
+    for conversion in res:
+        for content in conversion.contents:
+            if "\n" in content:
+                hit = True
+    assert hit == False
+    

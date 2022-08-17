@@ -148,7 +148,7 @@ def _make_class_def(sql: str) -> Conversion:
         code = _check_n_value(sql_line, code, data_type)
         var_name = sql_line.replace(
             "(", "").replace(")", "").lstrip().split()[0]
-        code = f"{var_name} = {code}\n"
+        code = f"{var_name} = {code}"
         if not conversion.grpc_variables:
             conversion.grpc_variables = []
         conversion.grpc_variables.append(
@@ -159,9 +159,8 @@ def _make_class_def(sql: str) -> Conversion:
             conversion.variable_names = []
         conversion.variable_names.append(var_name)
         if not conversion.contents:
-            conversion.contents = code
+            conversion.contents = [code]
         else:
-            conversion.contents += code
-    conversion.resolve_contents()
+            conversion.contents.append(code) 
     conversion.finalize_sorted_instructions()
     return conversion

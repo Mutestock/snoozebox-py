@@ -97,7 +97,7 @@ def create_base_directories(config: dict) -> None:
 def create_mode_specific_directories(config: dict) -> None:
     directories: List[str] = {
         "rest": [],
-        "grpc": [f"{PathingManager().project_root}/proto"],
+        "grpc": [PathingManager().project_root / "proto"],
         "kafka": [],
         "rabbitmq": [],
     }.get(config["service"].lower())
