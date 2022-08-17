@@ -1,11 +1,11 @@
 import requests
-from utils.pathing import get_relative_project_root_directory
+from utils.pathing import PathingManager
 
 GITIGNORE_IO_URL: str = "https://www.toptal.com/developers/gitignore/api/python"
 
 
-def write_git_ignore(config) -> None:
-    file_writer = open(get_relative_project_root_directory(config) + "/.gitignore", "w")
+def write_git_ignore() -> None:
+    file_writer = open(PathingManager().project_root / ".gitignore", "w")
     print("fetching https://www.toptal.com/developers/gitignore/api/python ...")
     res = requests.get("https://www.toptal.com/developers/gitignore/api/python")
     to_ignore = ["data", "logs", res.text]

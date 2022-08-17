@@ -1,26 +1,25 @@
 from dataclasses import dataclass
 from io import TextIOWrapper
+from pathlib import Path
 from typing import List
 from jinja2 import Environment, PackageLoader, select_autoescape
 from .config_gen import write_config
 from utils.poetry_exec import run_poetry, poetry_export_requirements
 from utils.pathing import (
     create_mode_specific_directories,
-    get_relative_project_root_directory,
-    get_relative_project_src_directory,
-    get_relative_tests_directory,
-    get_docker_compose_file,
     create_base_directories,
+    PathingManager,
 )
 from gen.gitignore_gen import write_git_ignore
 from pipe import where
 from gen.protogen import run_protogen
 import subprocess
 
+
 @dataclass
 class TemplateFileStructure:
-    template_path: str
-    generated_file_path: str
+    template_path: Path
+    generated_file_path: Path
     jinja_env: Environment
     render_args: dict
 
@@ -33,7 +32,6 @@ def _setup_templating() -> Environment:
 
 
 def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dict:
-    print("This is just going to be a lot of placeholders for now")
 
     if not config:
         config: dict = {}
@@ -50,7 +48,7 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     _run_redis_templates(config, jinja_env)
     _determine_and_run_service_templates(config, jinja_env)
     _determine_and_run_database_templates(config, jinja_env)
-    write_git_ignore(config)
+    write_git_ignore()
     write_config(config)
     run_protogen(config)
     print("Done")
@@ -67,7 +65,6 @@ def _determine_and_run_database_templates(config: dict, jinja_env: Environment) 
         config["database"].lower()
     )(config, jinja_env)
 
-    
 
 def _write_templates(template_file_structure: List[TemplateFileStructure]) -> None:
     for template_file in template_file_structure:
@@ -85,8 +82,8 @@ def _write_templates(template_file_structure: List[TemplateFileStructure]) -> No
 
 
 def _run_base_templates(config: dict, jinja_env: Environment) -> None:
-    src: str = get_relative_project_src_directory(config)
-    docker_compose: str = get_docker_compose_file(config)
+    src: Path = PathingManager().src
+    docker_compose: Path = PathingManager().docker_compose
     template_file_structure: List[TemplateFileStructure] = [
         TemplateFileStructure(
             template_path="misc/docker-compose_base.yml.jinja",
@@ -96,7 +93,7 @@ def _run_base_templates(config: dict, jinja_env: Environment) -> None:
         ),
         TemplateFileStructure(
             template_path="utils/config_interp.py.jinja",
-            generated_file_path=f"{src}/utils/config.py",
+            generated_file_path=src / "utils/config.py",
             jinja_env=jinja_env,
             render_args={},
         ),
@@ -105,19 +102,19 @@ def _run_base_templates(config: dict, jinja_env: Environment) -> None:
 
 
 def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
-    src: str = get_relative_project_src_directory(config)
-    test_dir: str = get_relative_tests_directory(config)
-    docker_compose: str = get_docker_compose_file(config)
+    src: Path = PathingManager().src
+    test_dir: Path = PathingManager().tests
+    docker_compose: Path = PathingManager().docker_compose
     template_file_structure: List[TemplateFileStructure] = [
         TemplateFileStructure(
             template_path="connection/redis/redis_gen.py.jinja",
-            generated_file_path=f"{src}/connection/redis_connection.py",
+            generated_file_path=src / "connection/redis_connection.py",
             jinja_env=jinja_env,
             render_args={},
         ),
         TemplateFileStructure(
             template_path="connection/redis/redis_test.py.jinja",
-            generated_file_path=f"{test_dir}/test_connection/test_redis_connection.py",
+            generated_file_path=test_dir / "test_connection/test_redis_connection.py",
             jinja_env=jinja_env,
             render_args={},
         ),
@@ -132,20 +129,21 @@ def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
 
 
 def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
-    src: str = get_relative_project_src_directory(config)
-    docker_compose: str = get_docker_compose_file(config)
-    test_dir: str = get_relative_tests_directory(config)
+    src: Path = PathingManager().src
+    docker_compose: Path = PathingManager().docker_compose
+    test_dir: Path = PathingManager().tests
 
     template_file_structure: List[TemplateFileStructure] = [
         TemplateFileStructure(
             template_path="connection/postgres/pg_gen.py.jinja",
-            generated_file_path=f"{src}/connection/postgres_connection.py",
+            generated_file_path=src / "connection/postgres_connection.py",
             jinja_env=jinja_env,
             render_args={"config": config},
         ),
         TemplateFileStructure(
             template_path="connection/postgres/pg_gen.py.jinja",
-            generated_file_path=f"{test_dir}/test_connection/test_postgres_connection.py",
+            generated_file_path=test_dir
+            / "test_connection/test_postgres_connection.py",
             jinja_env=jinja_env,
             render_args={"config": config},
         ),
@@ -157,19 +155,21 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
         ),
         TemplateFileStructure(
             template_path="logic/handlers/relational/generic_tools.py.jinja",
-            generated_file_path=f"{src}/logic/handlers/handler_utils/generic_tools.py",
+            generated_file_path=src / "logic/handlers/handler_utils/generic_tools.py",
             jinja_env=jinja_env,
             render_args={},
         ),
         TemplateFileStructure(
             template_path="logic/handlers/relational/relational_crud_component.py.jinja",
-            generated_file_path=f"{src}/logic/handlers/handler_utils/crud_handler_component.py",
+            generated_file_path=src
+            / "logic/handlers/handler_utils/crud_handler_component.py",
             jinja_env=jinja_env,
             render_args={},
         ),
         TemplateFileStructure(
             template_path="logic/handlers/relational/relational_utils_component.py.jinja",
-            generated_file_path=f"{src}/logic/handlers/handler_utils/utils_handler_component.py",
+            generated_file_path=src
+            / "logic/handlers/handler_utils/utils_handler_component.py",
             jinja_env=jinja_env,
             render_args={},
         ),
@@ -179,7 +179,7 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
             template_file_structure.append(
                 TemplateFileStructure(
                     template_path="model/pg_model.py.jinja",
-                    generated_file_path=f"{src}/models/{conversion.name.lower()}.py",
+                    generated_file_path=src / f"models/{conversion.name.lower()}.py",
                     jinja_env=jinja_env,
                     render_args={"config": config, "schematic": conversion},
                 )
@@ -188,11 +188,10 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
 
 
 def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
-    src: str = get_relative_project_src_directory(config)
-    docker_compose: str = get_docker_compose_file(config)
-    root: str = get_relative_project_root_directory(config)
-    dockerfile = f"{root}/Dockerfile"
-    
+    src: Path = PathingManager().src
+    docker_compose: Path = PathingManager().docker_compose
+    root: Path = PathingManager().project_root
+    dockerfile = PathingManager().dockerfile
 
     template_file_structure: List[TemplateFileStructure] = [
         TemplateFileStructure(
@@ -203,37 +202,42 @@ def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
         ),
         TemplateFileStructure(
             template_path="service/grpc/grpc_main_gen.py.jinja",
-            generated_file_path=f"{src}/main.py",
+            generated_file_path=src / "main.py",
             jinja_env=jinja_env,
             render_args={"config": config, "schematics": config["schematics"]},
         ),
         TemplateFileStructure(
             template_path="protogen/protogen.sh.jinja",
-            generated_file_path=f"{root}/protogen.sh",
+            generated_file_path=root / "protogen.sh",
             jinja_env=jinja_env,
-            render_args={"config": config}
+            render_args={"config": config},
         ),
         TemplateFileStructure(
             template_path="misc/grpc_dockerfile.jinja",
             generated_file_path=dockerfile,
             jinja_env=jinja_env,
-            render_args={"config": config, "apt_dependencies": " ".join(get_apt_dependencies(config))}       
-        )
+            render_args={
+                "config": config,
+                "apt_dependencies": " ".join(get_apt_dependencies(config)),
+            },
+        ),
     ]
     for schematic in config["schematics"]:
         for conversion in schematic:
             template_file_structure.append(
                 TemplateFileStructure(
                     template_path="logic/handlers/grpc/grpc_handler.py.jinja",
-                    generated_file_path=f"{src}/logic/handlers/{conversion.name.lower()}_handler.py",
+                    generated_file_path=src
+                    / f"logic/handlers/{conversion.name.lower()}_handler.py",
                     jinja_env=jinja_env,
                     render_args={"config": config, "schematic": conversion},
                 )
-            ),
+            )
             template_file_structure.append(
                 TemplateFileStructure(
                     template_path="service/grpc/grpc_routes_gen.py.jinja",
-                    generated_file_path=f"{src}/service/routes/{conversion.name.lower()}_routes.py",
+                    generated_file_path=src
+                    / f"service/routes/{conversion.name.lower()}_routes.py",
                     jinja_env=jinja_env,
                     render_args={"config": config, "schematic": conversion},
                 )
@@ -241,7 +245,7 @@ def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
             template_file_structure.append(
                 TemplateFileStructure(
                     template_path="protogen/proto_file_gen.proto.jinja",
-                    generated_file_path=f"{root}/proto/{conversion.name.lower()}.proto",
+                    generated_file_path=root / f"proto/{conversion.name.lower()}.proto",
                     jinja_env=jinja_env,
                     render_args={
                         "config": config,
@@ -298,8 +302,6 @@ def run_protogen(config: dict) -> None:
         ["chmod", "+x", protogen_sh], check=True, text=True, cwd=relative_project_path
     )
     subprocess.run(["./protogen.sh"], check=True, text=True, cwd=relative_project_path)
-
-
 
 
 def collect_dependencies(config: dict) -> None:

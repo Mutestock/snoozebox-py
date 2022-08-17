@@ -1,6 +1,6 @@
 from typing import List
 from utils.pathing import (
-    get_relative_generated_config_file,
+    PathingManager,
 )
 import rtoml
 from pipe import select
@@ -32,24 +32,25 @@ BASE_IRRELEVANT_CONFIG_KEYS: list = ["dependencies", "debian_dependencies"]
 def write_config(config: dict) -> None:
     service: str = config["service"].lower()
     database: str = config["database"].lower()
+    generated_toml: dict = {}
     def mode_write(config: dict, mode: str) -> None:
         dict_recurse_define(
-            config, ["relative_config_toml", mode, "database", database]
+            generated_toml, [mode, "database", database]
         )
-        dict_recurse_define(config, ["relative_config_toml", mode, "service", service])
-        dict_recurse_define(config, ["relative_config_toml", mode, "database", "redis"])
+        dict_recurse_define(generated_toml, [ mode, "service", service])
+        dict_recurse_define(generated_toml, [ mode, "database", "redis"])
         settings: dict = config["settings"]
         
-        config["relative_config_toml"][mode]["database"][database] = settings["database"][database]
-        config["relative_config_toml"][mode]["database"]["redis"] = settings["database"]["redis"]
-        config["relative_config_toml"][mode]["service"][service] = settings["server"][service]
+        generated_toml[mode]["database"][database] = settings["database"][database]
+        generated_toml[mode]["database"]["redis"] = settings["database"]["redis"]
+        generated_toml[mode]["service"][service] = settings["server"][service]
         
         for db in [database, "redis"]:
             for key in BASE_IRRELEVANT_CONFIG_KEYS + IRRELEVANT_CONFIG_KEYS.get(db):
-                config["relative_config_toml"][mode]["database"][db].pop(key, None)
+                generated_toml[mode]["database"][db].pop(key, None)
         for key in BASE_IRRELEVANT_CONFIG_KEYS + IRRELEVANT_CONFIG_KEYS.get(service):
-            config["relative_config_toml"][mode]["service"][service].pop(key, None)
+            generated_toml[mode]["service"][service].pop(key, None)
         
         
     list(["local", "test"] | select(lambda x: mode_write(config, x)))
-    rtoml.dump(pretty=True, file=open(get_relative_generated_config_file(config), "w"), obj=config["relative_config_toml"])
+    rtoml.dump(pretty=True, file=open(PathingManager().generated_config, "w"), obj=generated_toml)

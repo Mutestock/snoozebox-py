@@ -1,8 +1,12 @@
+from dataclasses import dataclass
 import os
 from typing import List
+from typing_extensions import Self
 from pipe import select
 from pathlib import Path
 import textwrap
+
+from .custom_errors import PathingInstantiatedWithoutConfigError
 
 
 def create_directories_if_not_exists(directories: list[str]):
@@ -21,37 +25,37 @@ def create_empty_files_if_not_exists(files: list[str]):
     list(files | select(lambda x: _touch_if_not_exists(x)))
 
 
-# Just to make code more readable elsewhere
-def get_relative_project_root_directory(config: dict) -> str:
-    return f"{config['settings']['file_structure']['root_services']}/{config['project_name']}"
+@dataclass(init=False)
+class PathingManager():
+    project_root: Path
+    src: Path
+    tests: Path
+    generated_config: Path
+    init_root: Path
+    docker_compose: Path
+    dockerfile: Path
+    _instance = None
+    
+    def __new__(cls: type[Self], _: dict = None) -> Self:
+        if cls._instance == None:
+            cls._instance = super(PathingManager, cls).__new__(cls)
+        return cls._instance
+    
+    def __init__(self, config: dict = None):
+        if config and not hasattr(self, "project_root"):
+            self.project_root = Path(f"{config['settings']['file_structure']['root_services']}/{config['project_name']}")
+            self.src = self.project_root / f"{config['project_name']}"
+            self.tests = self.project_root / "tests"
+            self.generated_config = self.project_root / "config.toml"
+            self.init_root = Path(config["settings"]["file_structure"]["root_services"]).parent
+            self.docker_compose = self.init_root / "docker-compose.yml"
+            self.dockerfile = self.project_root / "Dockerfile"
 
 
-def get_relative_project_src_directory(config: dict) -> str:
-    return f"{get_relative_project_root_directory(config)}/{config['project_name']}"
-
-
-def get_relative_tests_directory(config: dict) -> str:
-    return get_relative_project_root_directory(config) + "/tests"
-
-
-def get_relative_generated_config_file(config: dict) -> str:
-    return f"{get_relative_project_root_directory(config)}/{config['settings']['file_structure']['project_files']['config_file']}"
-
-
-def get_parent_of_root_services(config: dict) -> str:
-    parent = Path(
-        config["settings"]["file_structure"]["root_services"]
-    ).parent.absolute()
-    return parent
-
-def get_docker_compose_file(config: dict) -> str:
-    return f"{get_parent_of_root_services(config)}/docker-compose.yml"
-
-
-def get_directories_with_sql_files(path_str: str) -> dict:
+def get_directories_with_sql_files(path: Path) -> dict:
     directories_with_sql: dict = {}
 
-    for item in Path(path_str).iterdir():
+    for item in path.iterdir():
         if item.is_dir():
             for nested_item in item.iterdir():
                 if not nested_item.is_file():
@@ -70,18 +74,11 @@ def get_directories_with_sql_files(path_str: str) -> dict:
     return directories_with_sql
 
 
-def indent_writer(lvl: int, text: str, file_writer) -> None:
-    indent_concat = ""
-    for _ in range(lvl):
-        indent_concat += " "
-    file_writer.write(textwrap.indent(text=textwrap.dedent(text), prefix=indent_concat))
-
-
 
 def create_base_directories(config: dict) -> None:
     create_directories_if_not_exists(
         [
-            f"{get_relative_project_src_directory(config)}/{path_def[1]}"
+            PathingManager().src/ path_def[1]
             for path_def in config["settings"]["file_structure"][
                 "project_directories"
             ].values()
@@ -89,7 +86,7 @@ def create_base_directories(config: dict) -> None:
     )
     create_directories_if_not_exists(
         [
-            f"{get_relative_tests_directory(config)}/{path_def[1]}"
+            PathingManager().tests / path_def[1]
             for path_def in config["settings"]["file_structure"][
                 "test_directories"
             ].values()
@@ -100,7 +97,7 @@ def create_base_directories(config: dict) -> None:
 def create_mode_specific_directories(config: dict) -> None:
     directories: List[str] = {
         "rest": [],
-        "grpc": [f"{get_relative_project_root_directory(config)}/proto"],
+        "grpc": [f"{PathingManager().project_root}/proto"],
         "kafka": [],
         "rabbitmq": [],
     }.get(config["service"].lower())

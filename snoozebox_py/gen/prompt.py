@@ -1,13 +1,9 @@
 from pathlib import Path
 from utils.config import CONFIG
 import sys
-from utils.pathing import (
-    get_directories_with_sql_files,
-    get_parent_of_root_services,
-    get_relative_project_root_directory,
-)
 from pipe import select
 from snoozelib import sql_tables_to_classes
+from utils.pathing import PathingManager, get_directories_with_sql_files
 
 DATABASE_OPTIONS: dict = {"1": "Postgres", "2": "MongoDB", "3": "Cassandra"}
 SERVICE_OPTIONS: dict = {"1": "Rest", "2": "gRPC", "3": "Kafka", "4": "RabbitMQ"}
@@ -23,18 +19,18 @@ def run_append_prompt(config: dict = None) -> dict:
     config["project_name"] = input()
     if not config["project_name"]:
         sys.exit("The project name can't be empty")
-    if Path(get_relative_project_root_directory(config)).is_dir():
+    PathingManager(config)
+    if Path(PathingManager().project_root).is_dir():
         sys.exit("A directory with this name already exists")
     _database_prompt(config)
     _service_prompt(config)
     print("Grabbing schematics...")
-    schematics = _grab_schematics(config)
+    schematics = _grab_schematics()
     _schematics_prompt(config, schematics)
     config["schematics"] = list(
         config["schematics_directory"]
         | select(lambda x: sql_tables_to_classes(open(x, "r").read()))
     )
-
     return config
 
 
@@ -107,10 +103,8 @@ def _manage_selection(
         return config
 
 
-def _grab_schematics(config: dict) -> dict:
-    sql_dict = get_directories_with_sql_files(
-        f"{get_parent_of_root_services(config)}/schematics"
-    )
+def _grab_schematics() -> dict:
+    sql_dict = get_directories_with_sql_files(PathingManager().init_root / "schematics")
     if not sql_dict:
         print("No schematics found during execution")
         sys.exit("Aborting due to missing schematics...")
