@@ -1,0 +1,9 @@
+import unittest
+from connection.cassandra_connection import get_cassandra_connection
+
+
+class TestCassandra(unittest.testcase):
+    def test_connection(self):
+        stmt = session.prepare("SELECT now() FROM system.local;)
+        res = session.execute(stmt)
+        self.assertTrue(res!=None)
