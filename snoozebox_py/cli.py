@@ -11,7 +11,6 @@ from utils.pathing import (
 
 from snoozefile.snoozefile import generate_snoozefile
 from gen.prompt import run_append_prompt
-from gen.gen_base import exec_gen
 from snoozelib import sql_tables_to_classes
 from snoozelib.conversion import Conversion
 from gen.templates_management import templating_prompt

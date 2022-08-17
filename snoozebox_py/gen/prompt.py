@@ -1,5 +1,4 @@
 from pathlib import Path
-from gen import gen_base
 from utils.config import CONFIG
 import sys
 from utils.pathing import (
