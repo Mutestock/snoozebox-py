@@ -3,7 +3,6 @@ from io import TextIOWrapper
 from typing import List
 from jinja2 import Environment, PackageLoader, select_autoescape
 from .config_gen import write_config
-from .docker_gen import get_apt_dependencies
 from utils.poetry_exec import run_poetry, poetry_export_requirements
 from utils.pathing import (
     create_mode_specific_directories,
@@ -351,3 +350,13 @@ def collect_dependencies(config: dict) -> None:
         + config["settings"]["database"]["redis"]["dependencies"]
     )
     config["collected_dependencies"] = dependencies
+
+
+def get_apt_dependencies(config: dict) -> str:
+    database_settings: dict = config["settings"]["database"]
+    server_settings: dict = config["settings"]["server"]
+
+    return (
+        database_settings.get(config["database"].lower())["debian_dependencies"]
+        + server_settings.get(config["service"].lower())["debian_dependencies"]
+    )
