@@ -1,0 +1,11 @@
+from pymongo import MongoClient
+from utils.config import CONFIG
+
+MONGO_CONFIG = CONFIG["database"]["mongo"]
+
+client = MongoClient(
+    host=CONFIG["host"],
+    port=MONGO_CONFIG["port"], 
+    username=MONGO_CONFIG["usr"],
+    password=MONGO_CONFIG["pwd"],
+)

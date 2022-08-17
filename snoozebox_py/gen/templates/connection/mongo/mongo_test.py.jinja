@@ -1,0 +1,7 @@
+import unittest
+
+from connection.mongo_connection import client
+
+class TestMongo(unittest.testcase):
+    def test_mongo_connection(self):
+        self.assertTrue(client.server_info()!=None)
