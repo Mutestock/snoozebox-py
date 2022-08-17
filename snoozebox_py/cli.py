@@ -34,12 +34,6 @@ def init():
 
 
 @manager.command()
-def append():
-    config: dict = run_append_prompt()
-    exec_gen(config)
-
-
-@manager.command()
 @click.option("--path", "-p", required=True, help="Point to the sql file to translate")
 def translate(path):
     conversions: List[Conversion] = []
@@ -50,8 +44,7 @@ def translate(path):
         print(conversion.contents)
         
 @manager.command()
-def jinja():
-    print("This is just for testing purposes")
+def append():
     config: dict = run_append_prompt()
     templating_prompt(config=config)
 
