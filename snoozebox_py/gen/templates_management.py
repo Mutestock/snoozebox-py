@@ -16,7 +16,8 @@ from utils.pathing import (
 )
 from gen.gitignore_gen import write_git_ignore
 from pipe import where
-
+from gen.protogen import run_protogen
+import subprocess
 
 @dataclass
 class TemplateFileStructure:
@@ -53,6 +54,8 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     _determine_and_run_database_templates(config, jinja_env)
     write_git_ignore(config)
     write_config(config)
+    run_protogen(config)
+    print("Done")
 
 
 def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -> None:
@@ -202,7 +205,7 @@ def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
         ),
         TemplateFileStructure(
             template_path="service/grpc/grpc_main_gen.py.jinja",
-            generated_file_path=f"{src}/service/grpc_main.py",
+            generated_file_path=f"{src}/main.py",
             jinja_env=jinja_env,
             render_args={"config": config, "schematics": config["schematics"]},
         ),
@@ -287,3 +290,13 @@ def _set_crud_instructions(config: dict) -> None:
         ]
     else:
         print("Chosen database wasn't found. This should never happen")
+
+
+def run_protogen(config: dict) -> None:
+    relative_project_path = f"services/{config['project_name']}"
+    protogen_sh = config["settings"]["file_structure"]["project_files"]["protogen_file"]
+
+    subprocess.run(
+        ["chmod", "+x", protogen_sh], check=True, text=True, cwd=relative_project_path
+    )
+    subprocess.run(["./protogen.sh"], check=True, text=True, cwd=relative_project_path)
