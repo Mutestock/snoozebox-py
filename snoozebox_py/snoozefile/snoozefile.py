@@ -1,4 +1,5 @@
 from pathlib import Path
+import rtoml
 
 
 SNOOZEFILE_DEFAULT_CONTENTS = """"
@@ -12,6 +13,11 @@ schematics_path = "schematics"
 
 
 def generate_snoozefile(path: Path = None):
+    """Generates the snoozefile with some basic information. The snoozefile is necessary to store information between appends, as well as asserting a variety of rules.
+
+    :param path: The path in which the snoozefile should be generated, defaults to None
+    :type path: Path, optional
+    """    
     if not path:
         path = "snoozefile.toml"
 

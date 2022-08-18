@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from io import TextIOWrapper
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 from jinja2 import Environment, PackageLoader, select_autoescape
 from .config_gen import write_config
 from utils.poetry_exec import run_poetry, poetry_export_requirements
@@ -18,23 +18,45 @@ import subprocess
 
 @dataclass
 class TemplateFileStructure:
+    """Base for for template usage with Jinja.
+
+    :return: Base for template usage with Jinja
+    :rtype: TemplateFileStructure
+    """    
     template_path: Path
     generated_file_path: Path
     jinja_env: Environment
-    render_args: dict
+    render_args: Dict
 
     def get_render(self) -> str:
+        """The generated contents from the jinja files after rendering
+
+        :return: Rendered results
+        :rtype: str
+        """        
         return self.jinja_env.get_template(self.template_path).render(self.render_args)
 
 
 def _setup_templating() -> Environment:
+    """The loaded templating environment. Sets a variety of configurations.
+
+    :return: Jinja environment with applied configurations.
+    :rtype: Environment
+    """    
     return Environment(loader=PackageLoader("gen"), autoescape=select_autoescape)
 
 
-def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dict:
+def templating_generation(jinja_env: Environment = None, config: Dict = None) -> None:
+    """Main function for the append generation process.
+
+    :param jinja_env: The environment in which the Jinja should be executed, defaults to None
+    :type jinja_env: Environment, optional
+    :param config: Configuration dictionary which gets passed around and modified during the generation process, defaults to None
+    :type config: Dict, optional
+    """    
 
     if not config:
-        config: dict = {}
+        config: Dict = {}
     if not jinja_env:
         jinja_env: Environment = _setup_templating()
 
@@ -54,19 +76,38 @@ def templating_prompt(jinja_env: Environment = None, config: dict = None) -> dic
     print("Done")
 
 
-def _determine_and_run_service_templates(config: dict, jinja_env: Environment) -> None:
+def _determine_and_run_service_templates(config: Dict, jinja_env: Environment) -> None:
+    """Checks for the used service types and initiates templates depending on the result.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param jinja_env: The environment in which the Jinja should be executed
+    :type jinja_env: Environment
+    """    
     {"rest": None, "grpc": _run_grpc_templates, "kafka": None, "rabbitmq": None,}.get(
         config["service"].lower()
     )(config, jinja_env)
 
 
-def _determine_and_run_database_templates(config: dict, jinja_env: Environment) -> None:
+def _determine_and_run_database_templates(config: Dict, jinja_env: Environment) -> None:
+    """Checks for the used database types and initiates templates depending on the result.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param jinja_env: The environment in which the Jinja should be executed
+    :type jinja_env: Environment
+    """    
     {"postgres": _run_pg_templates, "mongodb": None, "cassandra": None}.get(
         config["database"].lower()
     )(config, jinja_env)
 
 
 def _write_templates(template_file_structure: List[TemplateFileStructure]) -> None:
+    """Writes templates to the files defined in a list of TemplateFileStructures.
+
+    :param template_file_structure: List of TemplateFileStructures which contain some variables and functions for template generation.
+    :type template_file_structure: List[TemplateFileStructure]
+    """    
     for template_file in template_file_structure:
         file_writer: TextIOWrapper = open(template_file.generated_file_path, "a")
         file_reader: TextIOWrapper = open(template_file.generated_file_path, "r")
@@ -81,7 +122,14 @@ def _write_templates(template_file_structure: List[TemplateFileStructure]) -> No
             file_writer.write(render)
 
 
-def _run_base_templates(config: dict, jinja_env: Environment) -> None:
+def _run_base_templates(config: Dict, jinja_env: Environment) -> None:
+    """Runs a set of templates which will always be executed regardless of selected techs
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param jinja_env: The environment in which the Jinja should be executed
+    :type jinja_env: Environment
+    """    
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
     template_file_structure: List[TemplateFileStructure] = [
@@ -101,7 +149,14 @@ def _run_base_templates(config: dict, jinja_env: Environment) -> None:
     _write_templates(template_file_structure)
 
 
-def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
+def _run_redis_templates(config: Dict, jinja_env: Environment) -> None:
+    """Runs templates related to Redis. All generated projects will use Redis as a cache regardless of selected techs.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param jinja_env: The environment in which the Jinja should be executed
+    :type jinja_env: Environment
+    """    
     src: Path = PathingManager().src
     test_dir: Path = PathingManager().tests
     docker_compose: Path = PathingManager().docker_compose
@@ -128,7 +183,14 @@ def _run_redis_templates(config: dict, jinja_env: Environment) -> None:
     _write_templates(template_file_structure)
 
 
-def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
+def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
+    """Runs templates related to postgres. Will only be executed if postgres is the selected database type
+    
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param jinja_env: The environment in which the Jinja should be executed
+    :type jinja_env: Environment
+    """    
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
     test_dir: Path = PathingManager().tests
@@ -187,7 +249,16 @@ def _run_pg_templates(config: dict, jinja_env: Environment) -> None:
     _write_templates(template_file_structure)
 
 
-def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
+def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
+    """Runs templates related to gRPC. Will only be executed if gRPC is the selected service type
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param jinja_env: The environment in which the Jinja should be executed
+    :type jinja_env: Environment
+    """    
+    
+    
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
     root: Path = PathingManager().project_root
@@ -261,7 +332,12 @@ def _run_grpc_templates(config: dict, jinja_env: Environment) -> None:
     _write_templates(template_file_structure)
 
 
-def _set_crud_instructions(config: dict) -> None:
+def _set_crud_instructions(config: Dict) -> None:
+    """Sets the crud instructions to be applied. This is relevant because not all database paradigms support all CRUD instructions. E.g. delete isn't well supported with Cassandra.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    """    
     database: str = config["database"]
     config["crud_instructions"] = []
 
@@ -294,7 +370,15 @@ def _set_crud_instructions(config: dict) -> None:
         print("Chosen database wasn't found. This should never happen")
 
 
-def run_protogen(config: dict) -> None:
+def run_protogen(config: Dict) -> None:
+    """Runs some subprocesses which uses the generated protogen file. 
+    This will only be executed if gRPC is the selected service type. 
+    The main point of the protogen file is to loop through all generated .proto file
+    and generate the resulting .py files from the grpc python library.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    """    
     relative_project_path = f"services/{config['project_name']}"
     protogen_sh = config["settings"]["file_structure"]["project_files"]["protogen_file"]
 
@@ -304,7 +388,14 @@ def run_protogen(config: dict) -> None:
     subprocess.run(["./protogen.sh"], check=True, text=True, cwd=relative_project_path)
 
 
-def collect_dependencies(config: dict) -> None:
+def collect_dependencies(config: Dict) -> None:
+    """Collects all Python dependencies to be used with poetry later on. 
+    These dependencies are stored within the config file, and will be appended according to the service and database types
+    as well as some base dependencies and redis dependencies.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    """    
     database: str = config.get("database")
     service: str = config.get("service")
     dependencies: list = []
@@ -354,9 +445,16 @@ def collect_dependencies(config: dict) -> None:
     config["collected_dependencies"] = dependencies
 
 
-def get_apt_dependencies(config: dict) -> str:
-    database_settings: dict = config["settings"]["database"]
-    server_settings: dict = config["settings"]["server"]
+def get_apt_dependencies(config: Dict) -> str:
+    """Collects apt dependencies to be used in the generated Dockerfile. An example would be gcc with postgres
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :return: Concatenation of all apt dependencies as a string.
+    :rtype: str
+    """    
+    database_settings: Dict = config["settings"]["database"]
+    server_settings: Dict = config["settings"]["server"]
 
     return (
         database_settings.get(config["database"].lower())["debian_dependencies"]

@@ -1,17 +1,27 @@
 from pathlib import Path
+from typing import Dict
 from utils.config import CONFIG
 import sys
 from pipe import select
 from snoozelib import sql_tables_to_classes
 from utils.pathing import PathingManager, get_directories_with_sql_files
 
-DATABASE_OPTIONS: dict = {"1": "Postgres", "2": "MongoDB", "3": "Cassandra"}
-SERVICE_OPTIONS: dict = {"1": "Rest", "2": "gRPC", "3": "Kafka", "4": "RabbitMQ"}
+DATABASE_OPTIONS: Dict = {"1": "Postgres", "2": "MongoDB", "3": "Cassandra"}
+SERVICE_OPTIONS: Dict = {"1": "Rest", "2": "gRPC", "3": "Kafka", "4": "RabbitMQ"}
 
 
-def run_append_prompt(config: dict = None) -> dict:
+def run_append_prompt(config: Dict = None) -> Dict:
+    """Executes the prompt which populates the config dictionary with basic information.
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process, defaults to None
+    :type config: Dict, optional
+    :return: Configuration dictionary with populated information from the prompt.
+    :rtype: Dict
+    """    
+    
+    
     if not config:
-        config: dict = {}
+        config: Dict = {}
     config.update(CONFIG)
     print("Welcome to snoozebox")
     print("\nNote that poetry is required: https://python-poetry.org/")
@@ -34,7 +44,12 @@ def run_append_prompt(config: dict = None) -> dict:
     return config
 
 
-def _database_prompt(config: dict) -> None:
+def _database_prompt(config: Dict) -> None:
+    """Prompts user for database tech selection
+    
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    """    
 
     print("Please choose a database paradigm\n")
     _print_options(DATABASE_OPTIONS)
@@ -46,7 +61,12 @@ def _database_prompt(config: dict) -> None:
         config = intermediate_config
 
 
-def _service_prompt(config: dict) -> None:
+def _service_prompt(config: Dict) -> None:
+    """Prompts user for service tech selection
+    
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    """    
 
     print("Please select a service type:\n")
     _print_options(SERVICE_OPTIONS)
@@ -60,13 +80,20 @@ def _service_prompt(config: dict) -> None:
         config = intermediate_config
 
 
-def _schematics_prompt(config: dict, schematics: dict) -> None:
+def _schematics_prompt(config: Dict, schematics: Dict) -> None:
+    """Prompts user to choose a directory in the schematics directory for generation
+
+    :param config: Configuration dictionary which gets passed around and modified during the generation process
+    :type config: Dict
+    :param schematics: The available choices.
+    :type schematics: Dict
+    """    
 
     print(
         "These are the directories in the schematics directory which contain sql files"
     )
     print("Select one\n")
-    enumerated: dict = {}
+    enumerated: Dict = {}
     for i, (key, value) in enumerate(schematics.items()):
         i_mod = str(i + 1)
         print(f"{i_mod}. {key}")
@@ -82,15 +109,33 @@ def _schematics_prompt(config: dict, schematics: dict) -> None:
         config = intermediate_config
 
 
-def _print_options(options: dict) -> None:
+def _print_options(options: Dict) -> None:
+    """Prints the available options to the user. Doesn't target any specific tech. Just prints.
+
+    :param config: The options to print to the terminal.
+    :type config: Dict
+    """    
     for key, value in options.items():
         print(key + ". " + value)
     print(f"Type 1-{ len(options.values()) }\n")
 
 
 def _manage_selection(
-    options: dict, config: dict, selection: str, subject: str
-) -> dict:
+    options: Dict, config: Dict, selection: str, subject: str
+) -> Dict:
+    """Function which controls the general flow of the selection process.
+
+    :param options: The available options to choose from
+    :type options: Dict
+    :param config: The options to print to the terminal.
+    :type config: Dict
+    :param selection: Selected choice. Used as a key with the dictionaries.
+    :type selection: str
+    :param subject: A key used with the configuration dict. E.g. "database" or "service"
+    :type subject: str
+    :return: Modified configuration dictionary.
+    :rtype: Dict
+    """    
 
     if not selection.isnumeric():
         print(selection + " is not a number. Please try again")
@@ -103,7 +148,12 @@ def _manage_selection(
         return config
 
 
-def _grab_schematics() -> dict:
+def _grab_schematics() -> Dict:
+    """Fetches the schematics from the directories which contain data structures
+
+    :return: Data from the data structures
+    :rtype: Dict
+    """    
     sql_dict = get_directories_with_sql_files(PathingManager().init_root / "schematics")
     if not sql_dict:
         print("No schematics found during execution")
