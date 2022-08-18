@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List, Optional
 from snoozelib.import_instruction import ImportInstruction
 from snoozelib.grpc_variable import GrpcVariable
-import textwrap
 
 from .import_instruction import SortedInstruction
 
@@ -26,6 +25,9 @@ class Conversion:
                     or dependency.import_name != current_dependency.import_name
                 ):
                     self.import_instructions.append(dependency)
+                    
+    def _rinse_import_instructions(self):
+        del self.import_instructions
 
     def finalize_sorted_instructions(self) -> None:
         for instruction in self.import_instructions:
@@ -50,3 +52,4 @@ class Conversion:
                 self.sorted_import_instructions.append(
                     SortedInstruction.from_import_instruction(instruction)
                 )
+        self._rinse_import_instructions()

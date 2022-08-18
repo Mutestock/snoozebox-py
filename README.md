@@ -36,3 +36,7 @@ Docker: https://www.docker.com/
 ### Requirements Depending On Tech Choices
 
 Postgres libaries. Check: https://www.psycopg.org/install/
+
+## Acknowledgements
+
+Snoozelib is *very* primitive.

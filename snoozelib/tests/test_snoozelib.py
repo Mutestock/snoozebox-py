@@ -11,7 +11,7 @@ def test_translation():
         stuff VARCHAR(255) NOT NULL
     );
     """)
-    actual = sql_tables_to_classes(sql)
+    actual = sql_tables_to_classes([sql])
     expected1 = 'id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)'
     expected2 = 'stuff = Column(String(255), nullable=False)'
     assert expected1 in actual[0].contents[0]
@@ -27,7 +27,7 @@ def test_table_name_contains_keywords():
         whatever INTEGER NOT NULL UNIQUE
     );   
     """)
-    actual = sql_tables_to_classes(sql)
+    actual = sql_tables_to_classes([sql])
     assert 'nullable=False' in actual[0].contents[0]
     
     
@@ -38,7 +38,7 @@ def test_unique_gets_added():
         whatever VARCHAR(255) UNIQUE NOT NULL
     );   
     """)
-    actual = sql_tables_to_classes(sql)
+    actual = sql_tables_to_classes([sql])
     assert "unique=True" in actual[0].contents[1]
     
     
@@ -49,7 +49,7 @@ def test_grpc_types():
         stuff VARCHAR(255) NOT NULL
     );
     """)
-    actual = sql_tables_to_classes(sql)
+    actual = sql_tables_to_classes([sql])
     
 
 def test_conversion_sorted_instructions_has_multiple_values():
@@ -59,7 +59,7 @@ def test_conversion_sorted_instructions_has_multiple_values():
         whatever VARCHAR(255) UNIQUE NOT NULL
     );   
     """)
-    res: List[Conversion] = sql_tables_to_classes(sql)
+    res: List[Conversion] = sql_tables_to_classes([sql])
     hit_of_over_one_vars: bool = False
     for conversion in res:
         for sorted_instruction in conversion.sorted_import_instructions:
@@ -75,7 +75,7 @@ def test_no_new_lines():
         whatever VARCHAR(255) UNIQUE NOT NULL
     );   
     """)
-    res: List[Conversion] = sql_tables_to_classes(sql)
+    res: List[Conversion] = sql_tables_to_classes([sql])
     hit: bool = False
     for conversion in res:
         for content in conversion.contents:

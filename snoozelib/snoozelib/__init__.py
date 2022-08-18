@@ -10,22 +10,28 @@ from snoozelib.conversion import Conversion
 from snoozelib.grpc_variable import GrpcVariable
 
 
-def sql_tables_to_classes(sql: str) -> List[Conversion]:
-    sql_lower: str = sql.lower()
-    if not "create table" in sql_lower or not ";" in sql:
-        return
-    statements: List[str] = sql_lower.split(";")
-    statements = [
-        _filter_unnecessary_keywords(statement)
-        for statement in statements
-        if "create table" in statement
-    ]
-    statements = [_make_class_def(statement) for statement in statements]
-    return statements
+def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
+    collected_statements = []
+    for sql in sql_sequences:
+        sql_lower: str = sql.lower()
+        if not "create table" in sql_lower or not ";" in sql:
+            return
+        statements = sql_lower.split(";")
+        statements = [
+            _filter_unnecessary_keywords(statement)
+            for statement in statements
+            if "create table" in statement
+        ]
+        statements = [_make_class_def(statement) for statement in statements]
+        collected_statements += statements
+        
+    return collected_statements
 
 
 def _filter_unnecessary_keywords(sql: str):
     return sql.replace("if not exists", "")
+
+
 
 
 def _get_data_type(sql: str) -> str:
@@ -69,6 +75,7 @@ def _check_nullable(sql: str, code: str) -> str:
 
 def _check_unique(sql: str, code: str) -> str:
     return _check_keyword(sql=sql, code=code, keyword="unique", to_add=", unique=True)")
+        
 
 
 def _get_only_numbers(sql: str, data_type: str) -> str:

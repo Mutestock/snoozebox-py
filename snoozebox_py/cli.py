@@ -67,7 +67,7 @@ def describe_sql(path, translate):
             for file_ in file_lists:
                 conversions: List[Conversion] = []
                 with open(file_, "r") as file_reader:
-                    conversions = sql_tables_to_classes(file_reader.read())
+                    conversions = sql_tables_to_classes([file_reader.read()])
                     print(conversions)
                 for conversion in conversions:
                     print(conversion.contents)
