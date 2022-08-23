@@ -6,3 +6,9 @@ class NoSqlDataTypeError(Exception):
 
 class MissingExpectedValue(Exception):
     pass
+
+class MalformedSequence(Exception):
+    pass
+
+class MissingTableInRelations(Exception):
+    pass

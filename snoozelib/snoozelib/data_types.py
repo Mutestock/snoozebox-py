@@ -3,7 +3,7 @@ from snoozelib.import_instruction import ImportInstruction
 
 # https://www.postgresql.org/docs/current/datatype.html
 # We're not covering most of these. It's out of scope
-data_types = {
+DATA_TYPES: dict = {
     "bigint": [
         "Column(BigInteger)", [
             ImportInstruction("sqlalchemy", "BigInteger"),
@@ -197,4 +197,8 @@ data_types = {
     "uuid": (),
     "xml": (),
 }
+
+
+
+NON_DATATYPE_KEYWORDS: list = ["FOREIGN KEY", "REFERENCES"]
 

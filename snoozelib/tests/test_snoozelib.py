@@ -83,3 +83,24 @@ def test_no_new_lines():
                 hit = True
     assert hit == False
     
+
+def test_relations() -> None:
+    sql01: str = textwrap.dedent(f"""\
+    CREATE TABLE contains_unique(
+        id SERIAL NOT NULL,
+        whatever VARCHAR(255) UNIQUE NOT NULL,
+        FOREIGN KEY uid REFERENCES some_table(uid)
+    );   
+    """)
+    sql02: str = textwrap.dedent(f"""\
+    CREATE TABLE some_table(
+        uid SERIAL NOT NULL,
+        name VARCHAR(255) UNIQUE NOT NULL
+    );   
+    """)
+    res: List[Conversion] = sql_tables_to_classes([sql01, sql02])
+    
+    
+def test_duplicate_table_name() -> None:
+    pass
+

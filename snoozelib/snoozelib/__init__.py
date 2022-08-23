@@ -1,13 +1,21 @@
 import re
 from typing import List
-from snoozelib.data_types import data_types
+from snoozelib.data_types import DATA_TYPES, NON_DATATYPE_KEYWORDS
 from snoozelib.custom_exceptions import (
-    MissingExpectedValue,
-    MultipleDataTypesError,
-    NoSqlDataTypeError,
+    MalformedSequence,
+    MissingTableInRelations,
 )
 from snoozelib.conversion import Conversion
-from snoozelib.grpc_variable import GrpcVariable
+from snoozelib.grpc import GrpcVariable, determine_type_for_grpc
+from snoozelib.import_instruction import ImportInstruction
+from snoozelib.general import (
+    filter_unnecessary_keywords,
+    get_next_word,
+    get_contents_inside_brackets,
+    get_data_type,
+    get_name_from_sql,
+)
+from snoozelib.checks import *
 
 
 def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
@@ -18,84 +26,62 @@ def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
             return
         statements = sql_lower.split(";")
         statements = [
-            _filter_unnecessary_keywords(statement)
+            filter_unnecessary_keywords(statement)
             for statement in statements
             if "create table" in statement
         ]
         statements = [_make_class_def(statement) for statement in statements]
         collected_statements += statements
-        
+
+    _retrofit_relations(sql_sequences=sql_sequences, statements=collected_statements)
     return collected_statements
 
 
-def _filter_unnecessary_keywords(sql: str):
-    return sql.replace("if not exists", "")
+def _retrofit_relations(sql_sequences: List[str], statements: List[Conversion]):
+    lowered_sequences: List[str] = [
+        filter_unnecessary_keywords(sequence.lower()) for sequence in sql_sequences
+    ]
+    for sequence in lowered_sequences:
+        if not "references" in sequence or not "foreign key" in sequence:
+            continue
+        name = get_next_word(
+            sql=sequence,
+            search_words="create table",
+        ).replace("(", "")
+        references = get_next_word(sql=sequence, search_words="references")
+        foreign_key_id = get_next_word(sql=sequence, search_words="foreign key")
+        reference_id = (
+            get_contents_inside_brackets(references)[0]
+            .replace("(", "")
+            .replace(")", "")
+        )
+        reference_table_name = references.split("(", maxsplit=1)[0]
 
+        if all([name, references, foreign_key_id, reference_id, reference_table_name]):
+            conversion01 = None
+            conversion02 = None
+            for conversion in statements:
+                if conversion.name == name:
+                    conversion01 = conversion
+                elif conversion.name == reference_table_name:
+                    conversion02 = conversion
+            if not conversion01:
+                raise MissingTableInRelations(
+                    f"Table {name} wasn't found in relations retrofit. Tell the dev he's stupid, since this isn't supposed to happen."
+                )
+            if not conversion02:
+                raise MissingTableInRelations(
+                    f"No table with the name {reference_table_name} was found. Are you sure you've created a table with such a name?"
+                )
+            conversion01.import_instructions.append(
+                ImportInstruction(origin="sqlalchemy.orm", import_name="backref")
+            )
+            conversion01.import_instructions.append(
+                ImportInstruction(origin="sqlalchemy.orm", import_name="relationship")
+            )
 
-
-
-def _get_data_type(sql: str) -> str:
-    hit_val: str = ""
-    for data_type in data_types.keys():
-        dtype_mod: str = data_type
-        if "(n)" in dtype_mod:
-            dtype_mod = data_type.replace(("(n)"), "")
-        for word in sql.split():
-            if "(" in word and ")" in word:
-                only_numbers = _get_only_numbers(sql, data_type)
-                word = word.replace(only_numbers, "n")
-            if data_type == word:
-                if not hit_val:
-                    hit_val = data_type
-                else:
-                    raise MultipleDataTypesError(
-                        f"sql contained both {hit_val} and {data_type}"
-                    )
-    if not hit_val:
-        raise NoSqlDataTypeError(f"No sql data type found in {sql}")
-    else:
-        return hit_val
-
-
-def _check_keyword(sql: str, code: str, keyword: str, to_add: str) -> str:
-    if keyword in sql:
-        # Last symbol is assumed to be a parenthesis on Column(Something(), nullable=False -->)<--
-        all_but_last_symbol: str = code[:-1]
-        all_but_last_symbol += to_add
-        return all_but_last_symbol
-    else:
-        return code
-
-
-def _check_nullable(sql: str, code: str) -> str:
-    return _check_keyword(
-        sql=sql, code=code, keyword="not null", to_add=", nullable=False)"
-    )
-
-
-def _check_unique(sql: str, code: str) -> str:
-    return _check_keyword(sql=sql, code=code, keyword="unique", to_add=", unique=True)")
-        
-
-
-def _get_only_numbers(sql: str, data_type: str) -> str:
-    only_post_data_type: str = re.sub(rf"^.+?(?={data_type})", "", sql)
-    contents_inside_brackets: str = re.findall(
-        r"\([^)]*\)", only_post_data_type)[0]
-    only_numbers: str = "".join(re.findall(r"\d", contents_inside_brackets))
-    return only_numbers
-
-
-def _check_n_value(sql: str, code: str, data_type: str) -> str:
-
-    if "(n)" in code:
-        only_numbers: str = _get_only_numbers(sql, data_type)
-        if not only_numbers:
-            raise MissingExpectedValue(
-                "No numbers were found post _check_n_value")
-        return code.replace("(n)", "(" + only_numbers + ")")
-    else:
-        return code
+        else:
+            raise MalformedSequence(f"The line: {sequence} is considered malformed")
 
 
 def _rinse_pre_class_def(sql: str) -> str:
@@ -103,64 +89,36 @@ def _rinse_pre_class_def(sql: str) -> str:
     return everything_after_first_bracket
 
 
-def _determine_type_for_grpc(sql_line: str) -> str:
-    dtype = _get_data_type(sql_line)
-    if dtype in [
-        "bigint",
-        "int8",
-        "bigserial",
-        "serial8",
-        "bit",
-        "bit_varying",
-        "bytea",
-        "double precision",
-        "float8",
-        "integer",
-        "int",
-        "int4",
-        "real",
-        "float4",
-        "smallint",
-        "int2",
-        "smallserial",
-        "serial2",
-        "serial",
-        "serial4",
-    ]:
-        return "int32"
-    elif dtype in ["bool", "boolean"]:
-        return "bool"
-    else:
-        return "string"
-
-
 def _make_class_def(sql: str) -> Conversion:
-    object_name: str = (
-        re.sub(r"^.+?(?=create table)", "",
-               sql).replace("create table", "").split()[0]
-    ).replace("(", "")
+    object_name: str = get_name_from_sql(sql)
     variables: List[str] = _rinse_pre_class_def(sql).split(",")
     conversion = Conversion(name=object_name)
     for sql_line in variables:
         if not sql_line:
             continue
+        if any(
+            [keyword.lower() in sql_line.lower() for keyword in NON_DATATYPE_KEYWORDS]
+        ):
+            continue
         sql_line = re.sub(r"[;\n]", "", sql_line)
-        data_type: str = _get_data_type(sql_line)
-        related_data = data_types[data_type]
+        data_type: str = get_data_type(sql_line)
+        related_data = DATA_TYPES[data_type]
         conversion.concatenate_dependencies(related_data[1])
 
         code: str = related_data[0]
-        code = _check_nullable(sql_line, code)
-        code = _check_unique(sql_line, code)
-        code = _check_n_value(sql_line, code, data_type)
-        var_name = sql_line.replace(
-            "(", "").replace(")", "").lstrip().split()[0]
+        code = check_nullable(sql_line, code)
+        code = check_unique(sql_line, code)
+        code = check_n_value(sql_line, code, data_type)
+        var_name = sql_line.replace("(", "").replace(")", "").lstrip().split()[0]
         code = f"{var_name} = {code}"
         if not conversion.grpc_variables:
             conversion.grpc_variables = []
         conversion.grpc_variables.append(
-            GrpcVariable(var_name=var_name, var_type=_determine_type_for_grpc(
-                sql_line), default="default" in sql_line)
+            GrpcVariable(
+                var_name=var_name,
+                var_type=determine_type_for_grpc(sql_line),
+                default="default" in sql_line,
+            )
         )
         if not conversion.variable_names:
             conversion.variable_names = []
@@ -168,6 +126,6 @@ def _make_class_def(sql: str) -> Conversion:
         if not conversion.contents:
             conversion.contents = [code]
         else:
-            conversion.contents.append(code) 
+            conversion.contents.append(code)
     conversion.finalize_sorted_instructions()
     return conversion

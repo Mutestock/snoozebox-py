@@ -8,7 +8,7 @@ from {{sorted_import_instruction.origin}} import {% for import_ in sorted_import
 {%- endfor %}
 
 class {{ schematic.name.capitalize() }}:
-    __tablename__: str = {{ schematic.name.lower() }}
+    __tablename__: str = "{{ schematic.name.lower() }}"
 
     {% for content in schematic.contents %}
     {{ content }}

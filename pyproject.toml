@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.9"
 click = "^8.1.2"
 pipe = "^1.6.0"
-snoozelib = {path = "snoozelib/dist/snoozelib-0.0.0a13-py3-none-any.whl"}
+snoozelib = {path = "snoozelib/dist/snoozelib-0.0.0a19-py3-none-any.whl"}
 rtoml = "^0.8.0"
 requests = "^2.27.1"
 Jinja2 = "^3.1.2"

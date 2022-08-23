@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 from snoozelib.import_instruction import ImportInstruction
-from snoozelib.grpc_variable import GrpcVariable
+from snoozelib.grpc import GrpcVariable
 
 from .import_instruction import SortedInstruction
 
