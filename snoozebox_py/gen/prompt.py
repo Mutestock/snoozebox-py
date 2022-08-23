@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 from utils.config import CONFIG
 import sys
 from pipe import select
@@ -17,9 +17,8 @@ def run_append_prompt(config: Dict = None) -> Dict:
     :type config: Dict, optional
     :return: Configuration dictionary with populated information from the prompt.
     :rtype: Dict
-    """    
-    
-    
+    """
+
     if not config:
         config: Dict = {}
     config.update(CONFIG)
@@ -37,24 +36,28 @@ def run_append_prompt(config: Dict = None) -> Dict:
     print("Grabbing schematics...")
     schematics = _grab_schematics()
     _schematics_prompt(config, schematics)
-    config["schematics"] = list(
-        config["schematics_directory"]
-        | select(lambda x: sql_tables_to_classes([open(x, "r").read()]))
+    schematics_contents: List[str] = list(
+        config["schematics_directory"] | select(lambda x: open(x, "r").read())
     )
+    config["schematics"] = sql_tables_to_classes(schematics_contents)
+    print("###")
+    print(config["schematics"])
     return config
 
 
 def _database_prompt(config: Dict) -> None:
     """Prompts user for database tech selection
-    
+
     :param config: Configuration dictionary which gets passed around and modified during the generation process
     :type config: Dict
-    """    
+    """
 
     print("Please choose a database paradigm\n")
     _print_options(DATABASE_OPTIONS)
     selected_database = input()
-    intermediate_config = _manage_selection(DATABASE_OPTIONS, config, selected_database, "database")
+    intermediate_config = _manage_selection(
+        DATABASE_OPTIONS, config, selected_database, "database"
+    )
     if not intermediate_config:
         _database_prompt(config)
     else:
@@ -63,10 +66,10 @@ def _database_prompt(config: Dict) -> None:
 
 def _service_prompt(config: Dict) -> None:
     """Prompts user for service tech selection
-    
+
     :param config: Configuration dictionary which gets passed around and modified during the generation process
     :type config: Dict
-    """    
+    """
 
     print("Please select a service type:\n")
     _print_options(SERVICE_OPTIONS)
@@ -87,7 +90,7 @@ def _schematics_prompt(config: Dict, schematics: Dict) -> None:
     :type config: Dict
     :param schematics: The available choices.
     :type schematics: Dict
-    """    
+    """
 
     print(
         "These are the directories in the schematics directory which contain sql files"
@@ -114,7 +117,7 @@ def _print_options(options: Dict) -> None:
 
     :param config: The options to print to the terminal.
     :type config: Dict
-    """    
+    """
     for key, value in options.items():
         print(key + ". " + value)
     print(f"Type 1-{ len(options.values()) }\n")
@@ -135,7 +138,7 @@ def _manage_selection(
     :type subject: str
     :return: Modified configuration dictionary.
     :rtype: Dict
-    """    
+    """
 
     if not selection.isnumeric():
         print(selection + " is not a number. Please try again")
@@ -153,7 +156,7 @@ def _grab_schematics() -> Dict:
 
     :return: Data from the data structures
     :rtype: Dict
-    """    
+    """
     sql_dict = get_directories_with_sql_files(PathingManager().init_root / "schematics")
     if not sql_dict:
         print("No schematics found during execution")

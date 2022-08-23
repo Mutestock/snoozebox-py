@@ -2,25 +2,19 @@ import grpc
 from concurrent import futures
 
 from utils.config import CONFIG
-{% for schematic_file in schematics -%}
-{% for schematic in schematic_file -%}
+{% for schematic in schematics -%}
 from protogen.{{schematic.name.lower()}}_pb2_grpc import add_{{schematic.name.capitalize()}}Servicer_to_server
 {%- endfor %}
-{%- endfor %}
-{% for schematic_file in schematics -%}
-{% for schematic in schematic_file -%}
+{% for schematic in schematics -%}
 from service.routes.{{schematic.name.lower()}}_routes import {{schematic.name.capitalize()}}Router
-{%- endfor %}
 {%- endfor %}
 
 def main() -> None:
     uri = f"{CONFIG['grpc']['host']}:{CONFIG['grpc']['port']}"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     print(f"GRPC: running on {uri}")
-    {% for schematic_file in schematics -%}
-    {% for schematic in schematic_file -%}
+    {% for schematic in schematics -%}
     add_{{schematic.name.capitalize()}}Servicer_to_server({{schematic.name.capitalize()}}Router(), server)
-    {%- endfor %}
     {%- endfor %}
     server.add_insecure_port(uri)
     server.start()

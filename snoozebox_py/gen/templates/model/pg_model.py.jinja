@@ -5,9 +5,9 @@ from protogen import {{ schematic.name.lower() }}_pb2
 
 {% for sorted_import_instruction in schematic.sorted_import_instructions -%}
 from {{sorted_import_instruction.origin}} import {% for import_ in sorted_import_instruction.imports %}{{ import_ }}{% if loop.index != loop.length %}, {% endif %}{% endfor %}
-{%- endfor %}
+{% endfor %}
 
-class {{ schematic.name.capitalize() }}:
+class {{ schematic.name.capitalize() }}(Base):
     __tablename__: str = "{{ schematic.name.lower() }}"
 
     {% for content in schematic.contents %}

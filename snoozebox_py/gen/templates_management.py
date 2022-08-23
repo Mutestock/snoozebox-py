@@ -22,7 +22,8 @@ class TemplateFileStructure:
 
     :return: Base for template usage with Jinja
     :rtype: TemplateFileStructure
-    """    
+    """
+
     template_path: Path
     generated_file_path: Path
     jinja_env: Environment
@@ -33,8 +34,14 @@ class TemplateFileStructure:
 
         :return: Rendered results
         :rtype: str
-        """        
-        return self.jinja_env.get_template(self.template_path).render(self.render_args)
+        """
+        return self._filter_render_for_printing(
+            self.jinja_env.get_template(self.template_path).render(self.render_args)
+        )
+
+    def _filter_render_for_printing(self, to_filter: str) -> str:
+        to_filter = to_filter.replace("&#34;", '"')
+        return to_filter
 
 
 def _setup_templating() -> Environment:
@@ -42,7 +49,7 @@ def _setup_templating() -> Environment:
 
     :return: Jinja environment with applied configurations.
     :rtype: Environment
-    """    
+    """
     return Environment(loader=PackageLoader("gen"), autoescape=select_autoescape)
 
 
@@ -53,7 +60,7 @@ def templating_generation(jinja_env: Environment = None, config: Dict = None) ->
     :type jinja_env: Environment, optional
     :param config: Configuration dictionary which gets passed around and modified during the generation process, defaults to None
     :type config: Dict, optional
-    """    
+    """
 
     if not config:
         config: Dict = {}
@@ -83,7 +90,7 @@ def _determine_and_run_service_templates(config: Dict, jinja_env: Environment) -
     :type config: Dict
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
-    """    
+    """
     {"rest": None, "grpc": _run_grpc_templates, "kafka": None, "rabbitmq": None,}.get(
         config["service"].lower()
     )(config, jinja_env)
@@ -96,7 +103,7 @@ def _determine_and_run_database_templates(config: Dict, jinja_env: Environment) 
     :type config: Dict
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
-    """    
+    """
     {"postgres": _run_pg_templates, "mongodb": None, "cassandra": None}.get(
         config["database"].lower()
     )(config, jinja_env)
@@ -107,7 +114,7 @@ def _write_templates(template_file_structure: List[TemplateFileStructure]) -> No
 
     :param template_file_structure: List of TemplateFileStructures which contain some variables and functions for template generation.
     :type template_file_structure: List[TemplateFileStructure]
-    """    
+    """
     for template_file in template_file_structure:
         file_writer: TextIOWrapper = open(template_file.generated_file_path, "a")
         file_reader: TextIOWrapper = open(template_file.generated_file_path, "r")
@@ -129,7 +136,7 @@ def _run_base_templates(config: Dict, jinja_env: Environment) -> None:
     :type config: Dict
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
-    """    
+    """
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
     template_file_structure: List[TemplateFileStructure] = [
@@ -156,7 +163,7 @@ def _run_redis_templates(config: Dict, jinja_env: Environment) -> None:
     :type config: Dict
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
-    """    
+    """
     src: Path = PathingManager().src
     test_dir: Path = PathingManager().tests
     docker_compose: Path = PathingManager().docker_compose
@@ -185,12 +192,12 @@ def _run_redis_templates(config: Dict, jinja_env: Environment) -> None:
 
 def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
     """Runs templates related to postgres. Will only be executed if postgres is the selected database type
-    
+
     :param config: Configuration dictionary which gets passed around and modified during the generation process
     :type config: Dict
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
-    """    
+    """
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
     test_dir: Path = PathingManager().tests
@@ -236,16 +243,16 @@ def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
             render_args={},
         ),
     ]
-    for schematic in config["schematics"]:
-        for conversion in schematic:
-            template_file_structure.append(
-                TemplateFileStructure(
-                    template_path="model/pg_model.py.jinja",
-                    generated_file_path=src / f"models/{conversion.name.lower()}.py",
-                    jinja_env=jinja_env,
-                    render_args={"config": config, "schematic": conversion},
-                )
+    for conversion in config["schematics"]:
+        # for conversion in schematic:
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="model/pg_model.py.jinja",
+                generated_file_path=src / f"models/{conversion.name.lower()}.py",
+                jinja_env=jinja_env,
+                render_args={"config": config, "schematic": conversion},
             )
+        )
     _write_templates(template_file_structure)
 
 
@@ -256,9 +263,8 @@ def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
     :type config: Dict
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
-    """    
-    
-    
+    """
+
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
     root: Path = PathingManager().project_root
@@ -293,41 +299,40 @@ def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
             },
         ),
     ]
-    for schematic in config["schematics"]:
-        for conversion in schematic:
-            template_file_structure.append(
-                TemplateFileStructure(
-                    template_path="logic/handlers/grpc/grpc_handler.py.jinja",
-                    generated_file_path=src
-                    / f"logic/handlers/{conversion.name.lower()}_handler.py",
-                    jinja_env=jinja_env,
-                    render_args={"config": config, "schematic": conversion},
-                )
+    for conversion in config["schematics"]:
+        # for conversion in schematic:
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="logic/handlers/grpc/grpc_handler.py.jinja",
+                generated_file_path=src
+                / f"logic/handlers/{conversion.name.lower()}_handler.py",
+                jinja_env=jinja_env,
+                render_args={"config": config, "schematic": conversion},
             )
-            template_file_structure.append(
-                TemplateFileStructure(
-                    template_path="service/grpc/grpc_routes_gen.py.jinja",
-                    generated_file_path=src
-                    / f"service/routes/{conversion.name.lower()}_routes.py",
-                    jinja_env=jinja_env,
-                    render_args={"config": config, "schematic": conversion},
-                )
+        )
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="service/grpc/grpc_routes_gen.py.jinja",
+                generated_file_path=src
+                / f"service/routes/{conversion.name.lower()}_routes.py",
+                jinja_env=jinja_env,
+                render_args={"config": config, "schematic": conversion},
             )
-            template_file_structure.append(
-                TemplateFileStructure(
-                    template_path="protogen/proto_file_gen.proto.jinja",
-                    generated_file_path=root / f"proto/{conversion.name.lower()}.proto",
-                    jinja_env=jinja_env,
-                    render_args={
-                        "config": config,
-                        "schematic": conversion,
-                        "non_default_variables": list(
-                            conversion.grpc_variables
-                            | where(lambda x: x.default == False)
-                        ),
-                    },
-                )
+        )
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="protogen/proto_file_gen.proto.jinja",
+                generated_file_path=root / f"proto/{conversion.name.lower()}.proto",
+                jinja_env=jinja_env,
+                render_args={
+                    "config": config,
+                    "schematic": conversion,
+                    "non_default_variables": list(
+                        conversion.grpc_variables | where(lambda x: x.default == False)
+                    ),
+                },
             )
+        )
 
     _write_templates(template_file_structure)
 
@@ -337,7 +342,7 @@ def _set_crud_instructions(config: Dict) -> None:
 
     :param config: Configuration dictionary which gets passed around and modified during the generation process
     :type config: Dict
-    """    
+    """
     database: str = config["database"]
     config["crud_instructions"] = []
 
@@ -371,14 +376,14 @@ def _set_crud_instructions(config: Dict) -> None:
 
 
 def run_protogen(config: Dict) -> None:
-    """Runs some subprocesses which uses the generated protogen file. 
-    This will only be executed if gRPC is the selected service type. 
+    """Runs some subprocesses which uses the generated protogen file.
+    This will only be executed if gRPC is the selected service type.
     The main point of the protogen file is to loop through all generated .proto file
     and generate the resulting .py files from the grpc python library.
 
     :param config: Configuration dictionary which gets passed around and modified during the generation process
     :type config: Dict
-    """    
+    """
     relative_project_path = f"services/{config['project_name']}"
     protogen_sh = config["settings"]["file_structure"]["project_files"]["protogen_file"]
 
@@ -389,13 +394,13 @@ def run_protogen(config: Dict) -> None:
 
 
 def collect_dependencies(config: Dict) -> None:
-    """Collects all Python dependencies to be used with poetry later on. 
+    """Collects all Python dependencies to be used with poetry later on.
     These dependencies are stored within the config file, and will be appended according to the service and database types
     as well as some base dependencies and redis dependencies.
 
     :param config: Configuration dictionary which gets passed around and modified during the generation process
     :type config: Dict
-    """    
+    """
     database: str = config.get("database")
     service: str = config.get("service")
     dependencies: list = []
@@ -452,7 +457,7 @@ def get_apt_dependencies(config: Dict) -> str:
     :type config: Dict
     :return: Concatenation of all apt dependencies as a string.
     :rtype: str
-    """    
+    """
     database_settings: Dict = config["settings"]["database"]
     server_settings: Dict = config["settings"]["server"]
 

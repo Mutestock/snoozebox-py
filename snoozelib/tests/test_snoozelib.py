@@ -1,5 +1,5 @@
 from typing import List
-from snoozelib import _determine_type_for_grpc, sql_tables_to_classes
+from snoozelib import sql_tables_to_classes
 from snoozelib.conversion import Conversion
 import textwrap
 
@@ -65,7 +65,6 @@ def test_conversion_sorted_instructions_has_multiple_values():
         for sorted_instruction in conversion.sorted_import_instructions:
             if len(sorted_instruction.imports) > 1:
                 hit_of_over_one_vars = True
-                print(sorted_instruction)
     assert hit_of_over_one_vars == True
     
 def test_no_new_lines():

@@ -3,7 +3,6 @@ from typing import List
 from snoozelib.data_types import DATA_TYPES, NON_DATATYPE_KEYWORDS
 from snoozelib.custom_exceptions import (
     MalformedSequence,
-    MissingTableInRelations,
 )
 from snoozelib.conversion import Conversion
 from snoozelib.grpc import GrpcVariable, determine_type_for_grpc
@@ -16,6 +15,7 @@ from snoozelib.general import (
     get_name_from_sql,
 )
 from snoozelib.checks import *
+from snoozelib.relations import sequence_related_to_relations, conversions_collection
 
 
 def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
@@ -34,65 +34,59 @@ def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
         collected_statements += statements
 
     _retrofit_relations(sql_sequences=sql_sequences, statements=collected_statements)
+    [conversion.finalize_sorted_instructions() for conversion in collected_statements]
     return collected_statements
 
 
-def _retrofit_relations(sql_sequences: List[str], statements: List[Conversion]):
+def _retrofit_relations(sql_sequences: List[str], statements: List[Conversion]) -> None:
     lowered_sequences: List[str] = [
         filter_unnecessary_keywords(sequence.lower()) for sequence in sql_sequences
     ]
     for sequence in lowered_sequences:
-        if not "references" in sequence or not "foreign key" in sequence:
+        if not sequence_related_to_relations(sequence=sequence):
             continue
-        name = get_next_word(
+        name: str = get_next_word(
             sql=sequence,
             search_words="create table",
         ).replace("(", "")
-        references = get_next_word(sql=sequence, search_words="references")
-        foreign_key_id = get_next_word(sql=sequence, search_words="foreign key")
-        reference_id = (
+        references: str = get_next_word(sql=sequence, search_words="references")
+        foreign_key_id: str = get_next_word(sql=sequence, search_words="foreign key")
+        reference_id: str = (
             get_contents_inside_brackets(references)[0]
             .replace("(", "")
             .replace(")", "")
         )
-        reference_table_name = references.split("(", maxsplit=1)[0]
+        reference_table_name: str = references.split("(", maxsplit=1)[0]
 
         if all([name, references, foreign_key_id, reference_id, reference_table_name]):
-            conversion01 = None
-            conversion02 = None
-            for conversion in statements:
-                if conversion.name == name:
-                    conversion01 = conversion
-                elif conversion.name == reference_table_name:
-                    conversion02 = conversion
-            if not conversion01:
-                raise MissingTableInRelations(
-                    f"Table {name} wasn't found in relations retrofit. Tell the dev he's stupid, since this isn't supposed to happen."
-                )
-            if not conversion02:
-                raise MissingTableInRelations(
-                    f"No table with the name {reference_table_name} was found. Are you sure you've created a table with such a name?"
-                )
-            conversion01.import_instructions.append(
-                ImportInstruction(origin="sqlalchemy.orm", import_name="backref")
+            (conversion01, conversion02) = conversions_collection(
+                statements=statements,
+                name=name,
+                reference_table_name=reference_table_name,
             )
             conversion01.import_instructions.append(
                 ImportInstruction(origin="sqlalchemy.orm", import_name="relationship")
             )
-
+            conversion01.contents.append(
+                f'{conversion02.name}s = relationship("{reference_table_name}")'
+            )
+            conversion02.import_instructions.append(ImportInstruction(origin="sqlalchemy", import_name="ForeignKey"))
+            conversion02.contents.append(
+                f'{reference_table_name}_{reference_id} = Column(Integer, ForeignKey("{name}.{foreign_key_id}"))'
+            )
         else:
             raise MalformedSequence(f"The line: {sequence} is considered malformed")
 
 
 def _rinse_pre_class_def(sql: str) -> str:
-    everything_after_first_bracket = re.sub(r"^.+?(?=\()", "", sql)
+    everything_after_first_bracket: str = re.sub(r"^.+?(?=\()", "", sql)
     return everything_after_first_bracket
 
 
 def _make_class_def(sql: str) -> Conversion:
     object_name: str = get_name_from_sql(sql)
     variables: List[str] = _rinse_pre_class_def(sql).split(",")
-    conversion = Conversion(name=object_name)
+    conversion: Conversion = Conversion(name=object_name)
     for sql_line in variables:
         if not sql_line:
             continue
@@ -127,5 +121,4 @@ def _make_class_def(sql: str) -> Conversion:
             conversion.contents = [code]
         else:
             conversion.contents.append(code)
-    conversion.finalize_sorted_instructions()
     return conversion
