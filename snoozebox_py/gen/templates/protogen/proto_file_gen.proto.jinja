@@ -25,15 +25,13 @@ service {{schematic.name.capitalize()}}{
 message {{schematic.name.capitalize()}}Object {
     {% for grpc_variable in schematic.grpc_variables: -%}
     {{grpc_variable.var_type}} {{grpc_variable.var_name}} = {{loop.index}};
-
-    {%- endfor %}
+    {% endfor %}
 }
 
 message New{{schematic.name.capitalize()}}Object{
     {% for grpc_variable in non_default_variables: -%}
     {{grpc_variable.var_type }} {{grpc_variable.var_name}} = {{loop.index}};
-
-    {%- endfor %}
+    {% endfor %}
 }
 
 

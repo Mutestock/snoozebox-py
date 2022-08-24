@@ -28,7 +28,7 @@ def create_empty_files_if_not_exists(files: List[Path]):
     :type files: List[Path]
     """    
     def _touch_if_not_exists(file_name: Path):
-        if not Path.exists():
+        if not file_name.exists():
             open(file_name, "w").close()
 
     list(files | select(lambda x: _touch_if_not_exists(x)))

@@ -40,8 +40,6 @@ def run_append_prompt(config: Dict = None) -> Dict:
         config["schematics_directory"] | select(lambda x: open(x, "r").read())
     )
     config["schematics"] = sql_tables_to_classes(schematics_contents)
-    print("###")
-    print(config["schematics"])
     return config
 
 

@@ -30,5 +30,5 @@ def generate_snoozefile(path: Path = None):
 
 
 def check_available_ports():
-    pass
+    raise NotImplemented()
 

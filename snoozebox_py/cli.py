@@ -3,6 +3,7 @@ import sys
 from typing import Dict, List
 import os
 import click
+from gen.examples import write_examples
 from utils.custom_errors import EmptySchematicsError
 from utils.pathing import (
     create_directories_if_not_exists,
@@ -23,16 +24,16 @@ def manager():
 
 
 @manager.command()
-@click.option(
-    "--data-path",
-    help="Configures the snoozefile to point to an already existing directory containing data",
-)
-def init():
+@click.option("--no-examples","-n", help="Skips the example directory inside schematics", is_flag=True)
+def init(no_examples):
     """Generates some basic files and directories to be used for appending services.
     """    
     create_directories_if_not_exists([Path("schematics"), Path("services")])
     create_empty_files_if_not_exists([Path("snoozefile.toml"), Path("docker-compose.yml")])
     generate_snoozefile()
+    if not no_examples:
+        create_directories_if_not_exists([Path("schematics/examples")])
+        write_examples(Path("schematics"))
 
         
 @manager.command()

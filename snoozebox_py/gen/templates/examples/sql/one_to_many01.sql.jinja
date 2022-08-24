@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS person(
+    id SERIAL NOT NULL,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    age INT NOT NULL,
+    occupied BOOL NOT NULL
+);
