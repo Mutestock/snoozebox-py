@@ -5,8 +5,7 @@ GITIGNORE_IO_URL: str = "https://www.toptal.com/developers/gitignore/api/python"
 
 
 def write_git_ignore() -> None:
-    """Fetches a basic .gitignore file from toptal and writes it to the generated project's .gitignore file.
-    """    
+    """Fetches a basic .gitignore file from toptal and writes it to the generated project's .gitignore file."""
     file_writer = open(PathingManager().project_root / ".gitignore", "w")
     print("fetching https://www.toptal.com/developers/gitignore/api/python ...")
     res = requests.get("https://www.toptal.com/developers/gitignore/api/python")

@@ -39,7 +39,7 @@ def run_append_prompt(config: Dict = None) -> Dict:
     schematics_contents: List[str] = list(
         config["schematics_directory"] | select(lambda x: open(x, "r").read())
     )
-    config["schematics"] = sql_tables_to_classes(schematics_contents)
+    (config["schematics"], config["association_tables"]) = sql_tables_to_classes(schematics_contents)
     return config
 
 

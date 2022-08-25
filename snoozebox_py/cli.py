@@ -15,6 +15,7 @@ from snoozefile.snoozefile import generate_snoozefile
 from gen.prompt import run_append_prompt
 from snoozelib import sql_tables_to_classes
 from snoozelib.conversion import Conversion
+from snoozelib.relations import M2MAssociationTableInfo
 from gen.templates_management import templating_generation
 
 
@@ -67,8 +68,11 @@ def describe_sql(path, translate):
         for file_lists in directories.values():
             for file_ in file_lists:
                 conversions: List[Conversion] = []
+                association_tables: List[M2MAssociationTableInfo] = []
                 with open(file_, "r") as file_reader:
-                    conversions = sql_tables_to_classes([file_reader.read()])
+                    (conversions, association_tables) = sql_tables_to_classes([file_reader.read()])
                     print(conversions)
                 for conversion in conversions:
                     print(conversion.contents)
+                for association_table in association_tables:
+                    print(association_tables)

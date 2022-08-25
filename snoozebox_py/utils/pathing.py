@@ -1,12 +1,8 @@
 from dataclasses import dataclass
-import os
 from typing import Dict, List
 from typing_extensions import Self
 from pipe import select
 from pathlib import Path
-import textwrap
-
-from .custom_errors import PathingInstantiatedWithoutConfigError
 
 
 def create_directories_if_not_exists(directories: List[Path]):

@@ -1,25 +1,21 @@
 import re
-from typing import List
+from typing import List, Tuple
 from snoozelib.data_types import DATA_TYPES, NON_DATATYPE_KEYWORDS
-from snoozelib.custom_exceptions import (
-    MalformedSequence,
-)
 from snoozelib.conversion import Conversion
 from snoozelib.grpc import GrpcVariable, determine_type_for_grpc
-from snoozelib.import_instruction import ImportInstruction
 from snoozelib.general import (
     filter_unnecessary_keywords,
-    get_next_word,
-    get_contents_inside_brackets,
     get_data_type,
     get_name_from_sql,
 )
 from snoozelib.checks import *
-from snoozelib.relations import sequence_related_to_relations, conversions_collection
+from snoozelib.relations import retrofit_relations, M2MAssociationTableInfo
 
 
-def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
+
+def sql_tables_to_classes(sql_sequences: List[str]) -> Tuple[List[Conversion], List[M2MAssociationTableInfo]]:
     collected_statements = []
+    collected_association_tables = []
     for sql in sql_sequences:
         sql_lower: str = sql.lower()
         if not "create table" in sql_lower or not ";" in sql:
@@ -33,49 +29,10 @@ def sql_tables_to_classes(sql_sequences: List[str]) -> List[Conversion]:
         statements = [_make_class_def(statement) for statement in statements]
         collected_statements += statements
 
-    _retrofit_relations(sql_sequences=sql_sequences, statements=collected_statements)
+    retrofit_relations(sql_sequences=sql_sequences, statements=collected_statements, association_tables=collected_association_tables)
     [conversion.finalize_sorted_instructions() for conversion in collected_statements]
-    return collected_statements
+    return (collected_statements, collected_association_tables)
 
-
-def _retrofit_relations(sql_sequences: List[str], statements: List[Conversion]) -> None:
-    lowered_sequences: List[str] = [
-        filter_unnecessary_keywords(sequence.lower()) for sequence in sql_sequences
-    ]
-    for sequence in lowered_sequences:
-        if not sequence_related_to_relations(sequence=sequence):
-            continue
-        name: str = get_next_word(
-            sql=sequence,
-            search_words="create table",
-        ).replace("(", "")
-        references: str = get_next_word(sql=sequence, search_words="references")
-        foreign_key_id: str = get_next_word(sql=sequence, search_words="foreign key")
-        reference_id: str = (
-            get_contents_inside_brackets(references)[0]
-            .replace("(", "")
-            .replace(")", "")
-        )
-        reference_table_name: str = references.split("(", maxsplit=1)[0]
-
-        if all([name, references, foreign_key_id, reference_id, reference_table_name]):
-            (conversion01, conversion02) = conversions_collection(
-                statements=statements,
-                name=name,
-                reference_table_name=reference_table_name,
-            )
-            conversion01.import_instructions.append(
-                ImportInstruction(origin="sqlalchemy.orm", import_name="relationship")
-            )
-            conversion01.contents.append(
-                f'{conversion02.name}s = relationship("{reference_table_name}")'
-            )
-            conversion02.import_instructions.append(ImportInstruction(origin="sqlalchemy", import_name="ForeignKey"))
-            conversion02.contents.append(
-                f'{reference_table_name}_{reference_id} = Column(Integer, ForeignKey("{name}.{foreign_key_id}"))'
-            )
-        else:
-            raise MalformedSequence(f"The line: {sequence} is considered malformed")
 
 
 def _rinse_pre_class_def(sql: str) -> str:
