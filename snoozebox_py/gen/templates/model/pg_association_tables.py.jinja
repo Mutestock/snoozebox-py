@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column
+from sqlalchemy import Table, Column, ForeignKey
 from connection.postgres_connection import Base
 
 {% for table in association_tables %}

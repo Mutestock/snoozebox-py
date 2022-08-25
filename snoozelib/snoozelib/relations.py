@@ -27,7 +27,7 @@ class M2MAssociationTableInfo:
     def __init__(self, sequence: str):
         seq_clone: str = sequence
         hits: int = 0
-        for line in enumerate(seq_clone.clone(",")):
+        for line in seq_clone.split(","):
             if not sequence_related_to_relations(line):
                 continue
             else:
@@ -89,6 +89,12 @@ class RelationSqlInfo:
             raise MalformedSequence(f"The line: {sequence} is considered malformed")
 
 
+class Relation(Enum):
+    NONE = 1
+    ONE_TO_MANY = 2
+    MANY_TO_MANY = 3
+
+
 def _extract_table_name(sequence) -> str:
     return get_next_word(
         sql=sequence,
@@ -132,6 +138,28 @@ def one_to_many(lowered_sequences: List[str], statements: List[Conversion]) -> N
         )
 
 
+def o2m_conversions_collection(
+    statements: List[Conversion], relation_sql_info: RelationSqlInfo
+) -> Tuple[Conversion, Conversion]:
+    conversion01: Conversion = None
+    conversion02: Conversion = None
+    for conversion in statements:
+        if conversion.name == relation_sql_info.name:
+            conversion01 = conversion
+        elif conversion.name == relation_sql_info.reference_table_name:
+            conversion02 = conversion
+    if not conversion01:
+        raise MissingTableInRelations(
+            f"Table {relation_sql_info.name} wasn't found in relations retrofit. Tell the dev he's stupid, since this isn't supposed to happen."
+        )
+    if not conversion02:
+        raise MissingTableInRelations(
+            f"No table with the name {relation_sql_info.reference_table_name} was found. Are you sure you've created a table with such a name?"
+        )
+    return (conversion01, conversion02)
+
+
+
 def many_to_many(
     lowered_sequences: List[str],
     statements: List[Conversion],
@@ -151,7 +179,7 @@ def many_to_many(
         conversion01.import_instructions.append(
             ImportInstruction(
                 origin="models.association_tables",
-                import_name=f"{m2m_association_table}",
+                import_name=f"{m2m_association_table.name}",
             )
         )
         conversion01.contents.append(
@@ -172,11 +200,15 @@ def m2m_conversions_collection(
 ) -> Tuple[Conversion, Conversion]:
     conversion01: Conversion = None
     conversion02: Conversion = None
+    conversion_to_remove: Conversion = None
     for conversion in statements:
         if conversion.name == m2m_association_table.ref_table_name01:
             conversion01 = conversion
         elif conversion.name == m2m_association_table.ref_table_name02:
             conversion02 = conversion
+        elif conversion.name == m2m_association_table.name:
+            conversion_to_remove = conversion
+    statements.remove(conversion_to_remove)
     if not conversion01 and not conversion02:
         raise MissingTableInRelations(
             f"""Neither a table of name {m2m_association_table.ref_table_name01} nor a table of name {m2m_association_table.ref_table_name02} was found. 
@@ -204,36 +236,22 @@ def m2m_conversions_collection(
             
             Aborting..."""
         )
-
-
-def o2m_conversions_collection(
-    statements: List[Conversion], relation_sql_info: RelationSqlInfo
-) -> Tuple[Conversion, Conversion]:
-    conversion01: Conversion = None
-    conversion02: Conversion = None
-    for conversion in statements:
-        if conversion.name == relation_sql_info.name:
-            conversion01 = conversion
-        elif conversion.name == relation_sql_info.reference_table_name:
-            conversion02 = conversion
-    if not conversion01:
+    if not conversion_to_remove:
         raise MissingTableInRelations(
-            f"Table {relation_sql_info.name} wasn't found in relations retrofit. Tell the dev he's stupid, since this isn't supposed to happen."
-        )
-    if not conversion02:
-        raise MissingTableInRelations(
-            f"No table with the name {relation_sql_info.reference_table_name} was found. Are you sure you've created a table with such a name?"
+            f"""No conversion was removed during many to many process. 
+            This is a programming error from the developer of snoozelib's part
+            Tell the snoozebox dev he's dumb
+            
+            Faulty sequence:
+            {sequence}
+            
+            Aborting..."""
         )
     return (conversion01, conversion02)
 
 
-class Relation(Enum):
-    NONE = 1
-    ONE_TO_MANY = 2
-    MANY_TO_MANY = 3
 
-
-def _discover_relations(sql_sequences: List[str]) -> Relation:
+def discover_relations(sql_sequences: List[str]) -> Relation:
     hits: int = 0
     for sequence in sql_sequences:
         if sequence_related_to_relations(sequence):
@@ -260,15 +278,18 @@ def retrofit_relations(
     lowered_sequences: List[str] = [
         filter_unnecessary_keywords(sequence.lower()) for sequence in sql_sequences
     ]
-    relation_strategy: Relation = _discover_relations(lowered_sequences)
-    if relation_strategy == Relation.NONE:
-        return
-    elif relation_strategy == Relation.ONE_TO_MANY:
-        one_to_many(lowered_sequences, statements)
-    elif relation_strategy == Relation.MANY_TO_MANY:
-        many_to_many(lowered_sequences, statements, association_tables)
-    else:
-        raise RelationsOutsideBounds(
-            """There were more than two references or foreign keys inside a table definition. Snoozebox isn't smart enough for that. Sorry. 
-            This particular result isn't supposed to happen, by the way. Inform the programmer that he sucks immediately."""
-        )
+    
+    for sequence in lowered_sequences:
+        sequence_lines = sequence.split(",")
+        relation_strategy: Relation = discover_relations(sequence_lines)
+        if relation_strategy == Relation.NONE:
+            continue
+        elif relation_strategy == Relation.ONE_TO_MANY:
+            one_to_many(lowered_sequences, statements)
+        elif relation_strategy == Relation.MANY_TO_MANY:
+            many_to_many(lowered_sequences, statements, association_tables)
+        else:
+            raise RelationsOutsideBounds(
+                """There were more than two references or foreign keys inside a table definition. Snoozebox isn't smart enough for that. Sorry. 
+                This particular result isn't supposed to happen, by the way. Inform the programmer that he sucks immediately."""
+            )

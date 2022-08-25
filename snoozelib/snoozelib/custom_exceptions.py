@@ -20,3 +20,9 @@ class MissingTableInRelations(Exception):
 
 class RelationsOutsideBounds(Exception):
     pass
+
+
+class ReservedKeyword(Exception):
+    pass
+
+

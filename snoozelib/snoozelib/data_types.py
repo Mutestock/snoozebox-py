@@ -1,4 +1,5 @@
 
+from typing import List
 from snoozelib.import_instruction import ImportInstruction
 
 # https://www.postgresql.org/docs/current/datatype.html
@@ -200,5 +201,5 @@ DATA_TYPES: dict = {
 
 
 
-NON_DATATYPE_KEYWORDS: list = ["FOREIGN KEY", "REFERENCES"]
-
+NON_DATATYPE_KEYWORDS: List[str] = ["FOREIGN KEY", "REFERENCES"]
+RESERVED_KEYWORDS: List[str] = ["message", "class", "def", "import"]

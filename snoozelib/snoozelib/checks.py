@@ -1,5 +1,6 @@
-from snoozelib.custom_exceptions import MissingExpectedValue
+from snoozelib.custom_exceptions import MissingExpectedValue, ReservedKeyword
 from snoozelib.general import get_only_numbers
+from snoozelib.data_types import RESERVED_KEYWORDS
 
 
 def check_keyword(sql: str, code: str, keyword: str, to_add: str) -> str:
@@ -31,3 +32,17 @@ def check_n_value(sql: str, code: str, data_type: str) -> str:
         return code.replace("(n)", "(" + only_numbers + ")")
     else:
         return code
+
+
+def check_reserved_keywords(sql: str) -> None:
+    for keyword in RESERVED_KEYWORDS:
+        if keyword in sql:
+            raise ReservedKeyword(
+                f"""'{keyword}' is a reserved keyword and thus cannot be used inside data structures.    
+                
+                Faulty sql:
+                {sql}
+                
+                Aborting...
+                """
+            )

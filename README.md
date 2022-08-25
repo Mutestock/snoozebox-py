@@ -39,4 +39,4 @@ Postgres libaries. Check: https://www.psycopg.org/install/
 
 ## Acknowledgements
 
-Snoozelib is *very* primitive.
+Snoozelib is *very* primitive. Try to follow the format of the examples when using init.

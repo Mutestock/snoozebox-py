@@ -66,13 +66,6 @@ def describe_sql(path, translate):
         raise EmptySchematicsError("No schematics with sql files")
     if translate:
         for file_lists in directories.values():
-            for file_ in file_lists:
-                conversions: List[Conversion] = []
-                association_tables: List[M2MAssociationTableInfo] = []
-                with open(file_, "r") as file_reader:
-                    (conversions, association_tables) = sql_tables_to_classes([file_reader.read()])
-                    print(conversions)
-                for conversion in conversions:
-                    print(conversion.contents)
-                for association_table in association_tables:
-                    print(association_tables)
+            (conversions, association_tables) = sql_tables_to_classes([open(file_,"r").read() for file_ in file_lists])
+            print(conversions)
+            print(association_tables)

@@ -54,4 +54,4 @@ def get_contents_inside_brackets(string_to_retrieve_contents_from: str) -> List[
 
 
 def filter_unnecessary_keywords(sql: str):
-    return sql.replace("if not exists", "")
+    return sql.replace("if not exists ", "")

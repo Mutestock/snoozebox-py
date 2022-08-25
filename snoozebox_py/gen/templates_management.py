@@ -196,6 +196,15 @@ def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
                 render_args={"config": config, "schematic": conversion},
             )
         )
+    template_file_structure.append(
+        TemplateFileStructure(
+            template_path="model/pg_association_tables.py.jinja",
+            generated_file_path=src / "models/association_tables.py",
+            jinja_env=jinja_env,
+            render_args={"association_tables": config["association_tables"]}
+        )
+    )
+    
     write_templates(template_file_structure)
 
 

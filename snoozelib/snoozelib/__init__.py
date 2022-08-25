@@ -9,7 +9,8 @@ from snoozelib.general import (
     get_name_from_sql,
 )
 from snoozelib.checks import *
-from snoozelib.relations import retrofit_relations, M2MAssociationTableInfo
+from snoozelib.relations import retrofit_relations, M2MAssociationTableInfo, discover_relations, Relation
+
 
 
 
@@ -45,12 +46,14 @@ def _make_class_def(sql: str) -> Conversion:
     variables: List[str] = _rinse_pre_class_def(sql).split(",")
     conversion: Conversion = Conversion(name=object_name)
     for sql_line in variables:
+        
         if not sql_line:
             continue
         if any(
             [keyword.lower() in sql_line.lower() for keyword in NON_DATATYPE_KEYWORDS]
         ):
             continue
+        check_reserved_keywords(sql_line.lower())
         sql_line = re.sub(r"[;\n]", "", sql_line)
         data_type: str = get_data_type(sql_line)
         related_data = DATA_TYPES[data_type]
