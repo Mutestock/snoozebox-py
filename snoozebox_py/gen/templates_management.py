@@ -13,8 +13,11 @@ from utils.pathing import (
 )
 from gen.gitignore_gen import write_git_ignore
 from gen.protogen import run_protogen
-from gen.template_file_structure import TemplateFileStructure, write_templates, setup_templating
-
+from gen.template_file_structure import (
+    TemplateFileStructure,
+    write_templates,
+    setup_templating,
+)
 
 
 def templating_generation(jinja_env: Environment = None, config: Dict = None) -> None:
@@ -124,13 +127,18 @@ def _run_redis_templates(config: Dict, jinja_env: Environment) -> None:
             jinja_env=jinja_env,
             render_args={},
         ),
-        TemplateFileStructure(
-            template_path="connection/redis/redis_docker_compose.yml.jinja",
-            generated_file_path=docker_compose,
-            jinja_env=jinja_env,
-            render_args={"config": config},
-        ),
     ]
+
+    if not f"{config['project_name']}_cache:" in open(docker_compose, "r").read():
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="connection/redis/redis_docker_compose.yml.jinja",
+                generated_file_path=docker_compose,
+                jinja_env=jinja_env,
+                render_args={"config": config},
+            )
+        )
+
     write_templates(template_file_structure)
 
 
@@ -161,12 +169,6 @@ def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
             render_args={"config": config},
         ),
         TemplateFileStructure(
-            template_path="connection/postgres/pg_docker_compose.yml.jinja",
-            generated_file_path=docker_compose,
-            jinja_env=jinja_env,
-            render_args={"config": config},
-        ),
-        TemplateFileStructure(
             template_path="logic/handlers/relational/generic_tools.py.jinja",
             generated_file_path=src / "logic/handlers/handler_utils/generic_tools.py",
             jinja_env=jinja_env,
@@ -187,6 +189,17 @@ def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
             render_args={},
         ),
     ]
+
+    if not f"{config['project_name']}_postgres:" in open(docker_compose, "r").read():
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="connection/postgres/pg_docker_compose.yml.jinja",
+                generated_file_path=docker_compose,
+                jinja_env=jinja_env,
+                render_args={"config": config},
+            )
+        )
+
     for conversion in config["schematics"]:
         template_file_structure.append(
             TemplateFileStructure(
@@ -201,10 +214,10 @@ def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
             template_path="model/pg_association_tables.py.jinja",
             generated_file_path=src / "models/association_tables.py",
             jinja_env=jinja_env,
-            render_args={"association_tables": config["association_tables"]}
+            render_args={"association_tables": config["association_tables"]},
         )
     )
-    
+
     write_templates(template_file_structure)
 
 
@@ -223,12 +236,6 @@ def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
     dockerfile = PathingManager().dockerfile
 
     template_file_structure: List[TemplateFileStructure] = [
-        TemplateFileStructure(
-            template_path="service/grpc/grpc_docker_compose.yml.jinja",
-            generated_file_path=docker_compose,
-            jinja_env=jinja_env,
-            render_args={"config": config},
-        ),
         TemplateFileStructure(
             template_path="service/grpc/grpc_main_gen.py.jinja",
             generated_file_path=src / "main.py",
@@ -251,6 +258,20 @@ def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
             },
         ),
     ]
+
+    if (
+        not f"{config['project_name']}_grpc_service:"
+        in open(docker_compose, "r").read()
+    ):
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="service/grpc/grpc_docker_compose.yml.jinja",
+                generated_file_path=docker_compose,
+                jinja_env=jinja_env,
+                render_args={"config": config},
+            ),
+        )
+
     for conversion in config["schematics"]:
         template_file_structure.append(
             TemplateFileStructure(
