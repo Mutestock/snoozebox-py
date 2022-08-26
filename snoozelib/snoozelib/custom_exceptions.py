@@ -26,3 +26,5 @@ class ReservedKeyword(Exception):
     pass
 
 
+class ManyToManyPrimaryKeyMismatch(Exception):
+    pass

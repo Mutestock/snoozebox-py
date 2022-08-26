@@ -2,11 +2,11 @@ from sqlalchemy import Table, Column, ForeignKey
 from connection.postgres_connection import Base
 
 {% for table in association_tables %}
-{{table.name}}_table = Table(
+{{table.name}}_association_table = Table(
     "{{table.name}}",
     Base.metadata,
-    Column("{{table.ref_table_name01}}_id", ForeignKey("{{table.ref_table_name01}}.{{table.fkey01}}"), primary_key=True),
-    Column("{{table.ref_table_name02}}_id", ForeignKey("{{table.ref_table_name02}}.{{table.fkey02}}"), primary_key=True),
+    Column("{{table.ref_table_name01}}_id", ForeignKey("{{table.ref_table_name01}}.{{table.ref_table_id_name01}}"), primary_key=True),
+    Column("{{table.ref_table_name02}}_id", ForeignKey("{{table.ref_table_name02}}.{{table.ref_table_id_name02}}"), primary_key=True),
 )
 {% endfor %}
 

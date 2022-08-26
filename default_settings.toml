@@ -2,7 +2,7 @@
 schematics=[]
 
 [settings]
-general_dependencies=["toml", "pipe", "nose2"]
+general_dependencies=["toml", "pipe", "nose2", "sphinx"]
 # Environment variable which determines how the program will be executed
 test_environment_variable_name="SNOOZE_TEST_MODE"
 docker_compose_network="snooze-net"

@@ -245,7 +245,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "snoozelib"
-version = "0.0.0a39"
+version = "0.0.0a42"
 description = "Library for snoozebox CLI tool"
 category = "main"
 optional = false
@@ -253,7 +253,7 @@ python-versions = ">=3.9,<4.0"
 
 [package.source]
 type = "file"
-url = "snoozelib/dist/snoozelib-0.0.0a39-py3-none-any.whl"
+url = "snoozelib/dist/snoozelib-0.0.0a42-py3-none-any.whl"
 
 [[package]]
 name = "tomli"
@@ -287,7 +287,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "83b798a7adce2de99ac52a31d454230b96964967a10aebaecb7b330a899d1611"
+content-hash = "b86572061c0ed7420854360dfafd33b6ba479420101a4b6bec7683285dac957c"
 
 [metadata.files]
 atomicwrites = []
@@ -427,7 +427,7 @@ rtoml = [
     {file = "rtoml-0.8.0.tar.gz", hash = "sha256:6d55fa9df88256c6762f01f18b8bd3f6dc1836600ea8655eb3719a2b8f3df764"},
 ]
 snoozelib = [
-    {file = "snoozelib-0.0.0a39-py3-none-any.whl", hash = "sha256:8132395d243feace7105defaa6a124c1e55eff8faede5a3914aa5cb2cfe0c029"},
+    {file = "snoozelib-0.0.0a42-py3-none-any.whl", hash = "sha256:fd748cbf2e17a8f43acc335ff6deb28ebea93b164bbc5058511698e93bc5c0d1"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},

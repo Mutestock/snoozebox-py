@@ -6,6 +6,13 @@ REDIS_CONFIG: dict = CONFIG["database"]["redis"]
 
 
 def get_cache_pool(settings: dict = None) -> StrictRedis:
+    """Retrieves the redis connection pool for caching purposes
+
+    :param settings: Dictionary which contains information required to create connection strings, defaults to None
+    :type settings: dict, optional
+    :return: A Redis connection with password protection.
+    :rtype: StrictRedis
+    """    
     if not settings: settings = REDIS_CONFIG
     return StrictRedis(
         host=settings["host"],

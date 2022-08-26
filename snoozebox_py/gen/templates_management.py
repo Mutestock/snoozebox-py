@@ -378,7 +378,7 @@ def collect_dependencies(config: Dict) -> None:
 
     if service == "Rest":
         ()
-    elif service == "gRPC":
+    elif service.lower() == "grpc":
         dependencies = (
             dependencies + config["settings"]["server"]["grpc"]["dependencies"]
         )

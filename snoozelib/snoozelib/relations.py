@@ -4,6 +4,7 @@ from snoozelib.custom_exceptions import (
     MissingTableInRelations,
     MalformedSequence,
     RelationsOutsideBounds,
+    ManyToManyPrimaryKeyMismatch,
 )
 from snoozelib.general import (
     get_next_word,
@@ -23,6 +24,8 @@ class M2MAssociationTableInfo:
     ref_table_name02: str
     fkey01: str
     fkey02: str
+    ref_table_id_name01: str = None
+    ref_table_id_name02: str = None
 
     def __init__(self, sequence: str):
         seq_clone: str = sequence
@@ -56,6 +59,28 @@ class M2MAssociationTableInfo:
             ]
         ):
             raise MalformedSequence(f"The line: {sequence} is considered malformed")
+
+    def set_ref_table_ids(
+        self, conversion01: Conversion, conversion02: Conversion, sequence: str
+    ):
+        self.ref_table_id_name01 = (
+            [line for line in conversion01.contents if "primary_key=True" in line][0]
+            .split("=")[0]
+            .replace(" ", "")
+        )
+        self.ref_table_id_name02 = (
+            [line for line in conversion02.contents if "primary_key=True" in line][0]
+            .split("=")[0]
+            .replace(" ", "")
+        )
+        err_msg: str = ""
+        if not self.ref_table_id_name01 or not self.ref_table_id_name02:
+            err += f"Error in {sequence}\n"
+            if not self.ref_table_id_name01:
+                err_msg += "primary key not found in conversion01."
+            if not self.ref_table_id_name02:
+                err_msg += "primary key not found in conversion02"
+            raise ManyToManyPrimaryKeyMismatch(err)
 
 
 @dataclass
@@ -159,7 +184,6 @@ def o2m_conversions_collection(
     return (conversion01, conversion02)
 
 
-
 def many_to_many(
     lowered_sequences: List[str],
     statements: List[Conversion],
@@ -172,6 +196,9 @@ def many_to_many(
         (conversion01, conversion02) = m2m_conversions_collection(
             statements, m2m_association_table, sequence
         )
+        m2m_association_table.set_ref_table_ids(
+            conversion01=conversion01, conversion02=conversion02, sequence=sequence
+        )
 
         conversion01.import_instructions.append(
             ImportInstruction(origin="sqlalchemy.orm", import_name="relationship")
@@ -179,11 +206,11 @@ def many_to_many(
         conversion01.import_instructions.append(
             ImportInstruction(
                 origin="models.association_tables",
-                import_name=f"{m2m_association_table.name}",
+                import_name=f"{m2m_association_table.name}_association_table",
             )
         )
         conversion01.contents.append(
-            f'{conversion02.name}s = relationship("{conversion02.name}", secondary={m2m_association_table.name})'
+            f'{conversion02.name}s = relationship("{conversion02.name}", secondary={m2m_association_table.name}_association_table)'
         )
         association_tables.append(m2m_association_table)
 
@@ -250,7 +277,6 @@ def m2m_conversions_collection(
     return (conversion01, conversion02)
 
 
-
 def discover_relations(sql_sequences: List[str]) -> Relation:
     hits: int = 0
     for sequence in sql_sequences:
@@ -278,7 +304,7 @@ def retrofit_relations(
     lowered_sequences: List[str] = [
         filter_unnecessary_keywords(sequence.lower()) for sequence in sql_sequences
     ]
-    
+
     for sequence in lowered_sequences:
         sequence_lines = sequence.split(",")
         relation_strategy: Relation = discover_relations(sequence_lines)

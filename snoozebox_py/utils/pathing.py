@@ -42,6 +42,7 @@ class PathingManager():
     init_root: Path
     docker_compose: Path
     dockerfile: Path
+    snoozefile: Path
     _instance = None
     
     def __new__(cls: type[Self], _: Dict = None) -> Self:
@@ -58,6 +59,7 @@ class PathingManager():
             self.init_root = Path(config["settings"]["file_structure"]["root_services"]).parent
             self.docker_compose = self.init_root / "docker-compose.yml"
             self.dockerfile = self.project_root / "Dockerfile"
+            self.snoozefile = self.init_root / "snoozefile.toml"
 
 
 

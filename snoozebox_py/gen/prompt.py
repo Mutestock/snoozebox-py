@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, List
+from snoozefile.snoozefile import shift_configured_ports_by_snoozefile
 from utils.config import CONFIG
 import sys
 from pipe import select
@@ -28,7 +29,7 @@ def run_append_prompt(config: Dict = None) -> Dict:
     config["project_name"] = input()
     if not config["project_name"]:
         sys.exit("The project name can't be empty")
-    PathingManager(config)
+    pathing_manager = PathingManager(config)
     if Path(PathingManager().project_root).is_dir():
         sys.exit("A directory with this name already exists")
     _database_prompt(config)
@@ -40,6 +41,7 @@ def run_append_prompt(config: Dict = None) -> Dict:
         config["schematics_directory"] | select(lambda x: open(x, "r").read())
     )
     (config["schematics"], config["association_tables"]) = sql_tables_to_classes(schematics_contents)
+    shift_configured_ports_by_snoozefile(config)
     return config
 
 
@@ -134,7 +136,7 @@ def _manage_selection(
     :type selection: str
     :param subject: A key used with the configuration dict. E.g. "database" or "service"
     :type subject: str
-    :return: Modified configuration dictionary.
+    :return: Modified configuration dihighest_port+2ctionary.
     :rtype: Dict
     """
 
