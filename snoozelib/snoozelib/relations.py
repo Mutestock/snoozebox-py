@@ -209,8 +209,17 @@ def many_to_many(
                 import_name=f"{m2m_association_table.name}_association_table",
             )
         )
+        # Added because of some instantiation issues
+        # Basically a chicken or egg issue
+        # We can't define that many tags has many messages without having a clear definition of what a msg is.
+        conversion01.import_instructions.append(
+            ImportInstruction(
+                origin=f"models.{conversion02.name.lower()}",
+                import_name=f"{conversion02.name.capitalize()}",
+            )
+        )
         conversion01.contents.append(
-            f'{conversion02.name}s = relationship("{conversion02.name}", secondary={m2m_association_table.name}_association_table)'
+            f'{conversion02.name}s = relationship("{conversion02.name.capitalize()}", secondary={m2m_association_table.name}_association_table)'
         )
         association_tables.append(m2m_association_table)
 

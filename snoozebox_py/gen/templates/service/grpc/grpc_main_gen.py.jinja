@@ -10,7 +10,7 @@ from service.routes.{{schematic.name.lower()}}_routes import {{schematic.name.ca
 {% endfor %}
 
 def main() -> None:
-    uri = f"{CONFIG['grpc']['host']}:{CONFIG['grpc']['port']}"
+    uri = f"{CONFIG['service']['grpc']['host']}:{CONFIG['service']['grpc']['port']}"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     print(f"GRPC: running on {uri}")
     {% for schematic in schematics -%}

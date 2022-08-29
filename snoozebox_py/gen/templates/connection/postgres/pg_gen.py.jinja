@@ -10,7 +10,6 @@ engine = create_engine(conn_string, pool_size=20, max_overflow=0)
 Base = declarative_base()
 
 
-
 def db_init() -> None:
     Base.metadata.create_all(bind=engine, checkfirst=True)
 
