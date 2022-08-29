@@ -30,7 +30,7 @@ port=15312
 usr="snoozebox-pg-user"
 pwd="snoozebox-pg-pwd"
 db="snoozebox-pg-db"
-dependencies=["psycopg2", "sqlalchemy","sqlalchemy-utils"]
+dependencies=["psycopg2-binary", "sqlalchemy","sqlalchemy-utils"]
 debian_dependencies=["gcc", "libpq-dev"]
 
 [settings.database.mongodb]

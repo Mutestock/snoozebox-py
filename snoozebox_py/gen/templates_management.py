@@ -448,6 +448,7 @@ def get_apt_dependencies(config: Dict) -> str:
 def _run_rest_templates(config: Dict, jinja_env: Environment):
     src: Path = PathingManager().src
     docker_compose: Path = PathingManager().docker_compose
+    dockerfile: Path = PathingManager().dockerfile
 
     template_file_structure: List[TemplateFileStructure] = [
         TemplateFileStructure(
@@ -456,6 +457,12 @@ def _run_rest_templates(config: Dict, jinja_env: Environment):
             jinja_env=jinja_env,
             render_args={"config": config},
         ),
+        TemplateFileStructure(
+            template_path="misc/rest_dockerfile.jinja",
+            generated_file_path=dockerfile,
+            jinja_env=jinja_env,
+            render_args={"config": config}
+        )
     ]
 
     if not f"{config['project_name']}_rest_service" in open(docker_compose, "r").read():

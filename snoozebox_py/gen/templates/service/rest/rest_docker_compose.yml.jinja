@@ -1,0 +1,11 @@
+
+  {{config["project_name"]}}_rest_service:
+    build:
+      context: {{config["settings"]["file_structure"]["root_services"]}}/{{config["project_name"]}}
+    container_name: {{config["project_name"]}}_rest_service
+    ports:
+      - {{config['settings']['server']['rest']['port']}}:{{config['settings']['server']['rest']['port']}}
+    restart: always
+    networks:
+      - {{config['settings']['docker_compose_network']}}
+
