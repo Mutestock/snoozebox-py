@@ -1,0 +1,67 @@
+from models.{{schematic.name.lower()}} import {{schematic.name.capitalize()}}
+from logic.handlers.{{schematic.name.lower()}}_handler import {{schematic.name.capitalize()}}Handler
+from flask import request, Flask
+
+{{schematic.name.upper()}}_HANDLER: {{schematic.name.capitalize()}}Handler = {{schematic.name.capitalize()}}Handler()
+
+
+{% if "create" in config["crud_instructions"] -%}
+def {{schematic.name.lower()}}_create_route():
+    pass
+{%- endif %}
+
+{% if "read" in config["crud_instructions"] -%}
+def {{schematic.name.lower()}}_read_route(id: int):
+    try:
+        return {{schematic.name.upper()}}_HANDLER.read(id)
+    except Exception as e:
+        print(e)
+        return "500"
+{%- endif %}
+
+{% if "update" in config["crud_instructions"] -%}
+def {{schematic.name.lower()}}_update_route(id: int):
+    pass
+{%- endif %}
+
+{% if "delete" in config["crud_instructions"] -%}
+def {{schematic.name.lower()}}_delete_route(id: int) -> str:
+    try:
+        {{schematic.name.upper()}}_HANDLER.delete(id)
+        return "204"
+    except Exception as e:
+        print(e)
+        return "500"
+{%- endif %}
+
+{% if "read_list" in config["crud_instructions"] -%}
+def {{schematic.name.lower()}}_read_list_route():
+    try:
+        return {{schematic.name.upper()}}_HANDLER.read_list()
+    except Exception as e:
+        print(e)
+        return "500"
+{%- endif %}
+
+
+def collect_routes(app: Flask):
+    {% if not config["crud_instructions"] -%}
+    pass
+    {% else %}
+    {% if "create" in config["crud_instructions"] -%}
+    app.add_url_rule("/{{schematic.name.lower()}}", view_func={{schematic.name.lower()}}_create_route, methods=["POST"])
+    {%- endif %}
+    {% if "read" in config["crud_instructions"] -%}
+    app.add_url_rule("/{{schematic.name.lower()}}/<int:id>", view_func={{schematic.name.lower()}}_read_route, methods=["GET"])
+    {%- endif %}    
+    {% if "update" in config["crud_instructions"] -%}
+    app.add_url_rule("/{{schematic.name.lower()}}/<int:id>", view_func={{schematic.name.lower()}}_update_route, methods=["PUT"])
+    {%- endif %}    
+    {% if "delete" in config["crud_instructions"] -%}
+    app.add_url_rule("/{{schematic.name.lower()}}/<int:id>", view_func={{schematic.name.lower()}}_delete_route, methods=["DELETE"])
+    {%- endif %}    
+    {% if "read_list" in config["crud_instructions"] -%}
+    app.add_url_rule("/{{schematic.name.lower()}}", view_func={{schematic.name.lower()}}_read_list_route, methods=["GET"])
+    {%- endif %}
+    {%- endif %}
+

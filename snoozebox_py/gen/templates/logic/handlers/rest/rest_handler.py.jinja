@@ -1,0 +1,17 @@
+from models.{{schematic.name.lower()}} import {{schematic.name.capitalize()}}
+from logic.handlers.handler_utils.crud_handler_component import CrudHandlerComponent
+from logic.handlers.handler_utils.utils_handler_component import UtilsHandlerComponent
+from dataclasses import dataclass
+
+
+@dataclass
+class {{schematic.name.capitalize()}}Handler():
+    object_instance: {{schematic.name.capitalize()}}
+    crud_handler_component: CrudHandlerComponent
+    utils_handler_component: UtilsHandlerComponent
+
+    def __init__(self):
+        self.object_instance = {{schematic.name.capitalize()}}()
+        self.crud_handler_component = CrudHandlerComponent(object_instance=self.object_instance)
+        self.utils_component = UtilsHandlerComponent(object_instance=self.object_instance)
+    

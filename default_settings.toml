@@ -77,7 +77,6 @@ models=["models","models"]
 routes=["routes","service/routes"]
 handlers=["handlers","logic/handlers"]
 handler_utils=["handler_utils","logic/handlers/handler_utils"]
-protogen=["protogen","protogen"]
 
 [settings.file_structure.project_files]
 config_file="config.toml"

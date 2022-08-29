@@ -1,0 +1,21 @@
+import logging
+from utils.config import CONFIG
+from flask import Flask
+{% for schematic in schematics -%}
+from service.routes import {{schematic.name.lower()}}_routes
+{% endfor %}
+app = Flask(__name__)
+{% for schematic in schematics -%}
+{{schematic.name.lower()}}_routes.collect_routes(app)
+{% endfor %}
+
+def main() -> None:
+    rest_conf: dict = CONFIG["service"]["rest"]
+    app.run(
+        debug=True,
+        host=rest_conf["host"], 
+        port=rest_conf["port"]
+    )
+
+if __name__ == "__main__":
+    main()

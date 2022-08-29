@@ -46,7 +46,8 @@ def templating_generation(jinja_env: Environment = None, config: Dict = None) ->
     _determine_and_run_database_templates(config, jinja_env)
     write_git_ignore()
     write_config(config)
-    run_protogen(config)
+    if config["service"].lower() == "grpc":
+        run_protogen(config)
     print("Done")
 
 
@@ -58,9 +59,12 @@ def _determine_and_run_service_templates(config: Dict, jinja_env: Environment) -
     :param jinja_env: The environment in which the Jinja should be executed
     :type jinja_env: Environment
     """
-    {"rest": None, "grpc": _run_grpc_templates, "kafka": None, "rabbitmq": None,}.get(
-        config["service"].lower()
-    )(config, jinja_env)
+    {
+        "rest": _run_rest_templates,
+        "grpc": _run_grpc_templates,
+        "kafka": None,
+        "rabbitmq": None,
+    }.get(config["service"].lower())(config, jinja_env)
 
 
 def _determine_and_run_database_templates(config: Dict, jinja_env: Environment) -> None:
@@ -397,17 +401,19 @@ def collect_dependencies(config: Dict) -> None:
     else:
         print("Chosen database wasn't found. This should never happen")
 
-    if service == "Rest":
-        ()
+    if service.lower() == "rest":
+        dependencies = (
+            dependencies + config["settings"]["server"]["rest"]["dependencies"]
+        )
     elif service.lower() == "grpc":
         dependencies = (
             dependencies + config["settings"]["server"]["grpc"]["dependencies"]
         )
-    elif service == "Kafka":
+    elif service.lower() == "kafka":
         dependencies = (
             dependencies + config["settings"]["server"]["kafka"]["dependencies"]
         )
-    elif service == "RabbitMQ":
+    elif service.lower() == "rabbitmq":
         dependencies = (
             dependencies + config["settings"]["server"]["rabbitmq"]["dependencies"]
         )
@@ -437,3 +443,47 @@ def get_apt_dependencies(config: Dict) -> str:
         database_settings.get(config["database"].lower())["debian_dependencies"]
         + server_settings.get(config["service"].lower())["debian_dependencies"]
     )
+
+
+def _run_rest_templates(config: Dict, jinja_env: Environment):
+    src: Path = PathingManager().src
+    docker_compose: Path = PathingManager().docker_compose
+
+    template_file_structure: List[TemplateFileStructure] = [
+        TemplateFileStructure(
+            template_path="service/rest/rest_main_gen.py.jinja",
+            generated_file_path=src / "main.py",
+            jinja_env=jinja_env,
+            render_args={"config": config},
+        ),
+    ]
+
+    if not f"{config['project_name']}_rest_service" in open(docker_compose, "r").read():
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="service/rest/rest_docker_compose.yml.jinja",
+                generated_file_path=docker_compose,
+                jinja_env=jinja_env,
+                render_args={"config": config},
+            )
+        )
+    for conversion in config["schematics"]:
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="service/rest/rest_routes_gen.py.jinja",
+                generated_file_path=src
+                / f"service/routes/{conversion.name.lower()}_routes.py",
+                jinja_env=jinja_env,
+                render_args={"config": config, "schematic": conversion},
+            )
+        )
+        template_file_structure.append(
+            TemplateFileStructure(
+                template_path="logic/handlers/rest/rest_handler.py.jinja",
+                generated_file_path=src
+                / f"logic/handlers/{conversion.name.lower()}_handler.py",
+                jinja_env=jinja_env,
+                render_args={"config": config, "schematic": conversion},
+            )
+        )
+    write_templates(template_file_structure)
