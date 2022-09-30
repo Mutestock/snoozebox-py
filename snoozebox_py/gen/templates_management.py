@@ -304,7 +304,7 @@ def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
                     "config": config,
                     "schematic": conversion,
                     "non_default_variables": list(
-                        conversion.grpc_variables | where(lambda x: x.default == False)
+                        conversion.grpc_variables | where(lambda x: x.default == False and "id" not in x.var_name)
                     ),
                 },
             )
