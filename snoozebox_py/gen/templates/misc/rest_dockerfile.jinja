@@ -9,4 +9,4 @@ RUN poetry install --no-dev
 RUN poetry add gunicorn
 WORKDIR /app/{{config["project_name"]}}
 EXPOSE {{config["settings"]["server"]["rest"]["port"]}}
-CMD ["gunicorn", "-b", "0.0.0.0:{{config["settings"]["server"]["rest"]["port"]}}", "main:app"]
+CMD ["poetry", "run", "gunicorn", "-b", "0.0.0.0:{{config["settings"]["server"]["rest"]["port"]}}", "main:app"]

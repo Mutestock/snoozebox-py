@@ -3,6 +3,8 @@ COPY . /app
 WORKDIR /app
 RUN apt-get update
 RUN apt-get install {{apt_dependencies}} -y
-RUN pip install -r requirements.txt
+RUN python3 -m pip install poetry
+RUN poetry config virtualenvs.in-project true --local
+RUN poetry install --no-dev
 EXPOSE {{config["settings"]["server"]["grpc"]["port"]}}
-CMD ["python", "{{config["project_name"]}}/main.py"]
+CMD ["poetry", "run", "python", "{{config["project_name"]}}/main.py"]

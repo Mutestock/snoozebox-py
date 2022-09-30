@@ -13,6 +13,7 @@ Base = declarative_base()
 def db_init() -> None:
     Base.metadata.create_all(bind=engine, checkfirst=True)
 
+
 def db_drop() -> None:
     Base.metadata.drop_all(bind=engine, checkfirst=True)
 

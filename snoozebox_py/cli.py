@@ -14,8 +14,6 @@ from utils.pathing import (
 from snoozefile.snoozefile import generate_snoozefile
 from gen.prompt import run_append_prompt
 from snoozelib import sql_tables_to_classes
-from snoozelib.conversion import Conversion
-from snoozelib.relations import M2MAssociationTableInfo
 from gen.templates_management import templating_generation
 
 

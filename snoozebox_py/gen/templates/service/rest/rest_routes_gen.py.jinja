@@ -13,7 +13,7 @@ def {{schematic.name.lower()}}_create_route():
 {% if "read" in config["crud_instructions"] -%}
 def {{schematic.name.lower()}}_read_route(id: int):
     try:
-        return {{schematic.name.upper()}}_HANDLER.read(id)
+        return {{schematic.name.upper()}}_HANDLER.crud_handler_component.read(id)
     except Exception as e:
         print(e)
         return "500"
@@ -27,7 +27,7 @@ def {{schematic.name.lower()}}_update_route(id: int):
 {% if "delete" in config["crud_instructions"] -%}
 def {{schematic.name.lower()}}_delete_route(id: int) -> str:
     try:
-        {{schematic.name.upper()}}_HANDLER.delete(id)
+        {{schematic.name.upper()}}_HANDLER.crud_handler_component.delete(id)
         return "204"
     except Exception as e:
         print(e)
@@ -37,14 +37,14 @@ def {{schematic.name.lower()}}_delete_route(id: int) -> str:
 {% if "read_list" in config["crud_instructions"] -%}
 def {{schematic.name.lower()}}_read_list_route():
     try:
-        return {{schematic.name.upper()}}_HANDLER.read_list()
+        return {{schematic.name.upper()}}_HANDLER.crud_handler_component.read_list()
     except Exception as e:
         print(e)
         return "500"
 {%- endif %}
 
 
-def collect_routes(app: Flask):
+def collect_routes(app: Flask) -> None:
     {% if not config["crud_instructions"] -%}
     pass
     {% else %}

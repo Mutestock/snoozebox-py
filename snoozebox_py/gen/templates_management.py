@@ -455,7 +455,7 @@ def _run_rest_templates(config: Dict, jinja_env: Environment):
             template_path="service/rest/rest_main_gen.py.jinja",
             generated_file_path=src / "main.py",
             jinja_env=jinja_env,
-            render_args={"config": config},
+            render_args={"schematics": config["schematics"]},
         ),
         TemplateFileStructure(
             template_path="misc/rest_dockerfile.jinja",

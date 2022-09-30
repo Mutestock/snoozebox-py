@@ -19,7 +19,7 @@ def get_cache_pool(settings: dict = None) -> StrictRedis:
         port=settings["port"],
         password=settings["pwd"],
         charset="utf-8",
-        db=settings["database"],
+        db=settings["db"],
         decode_responses=True,
     )
 
@@ -44,5 +44,5 @@ def redis_delete(key: str) -> Optional[int]:
     return get_cache_pool().delete(key)
 
 
-def redis_flush():
+def redis_flush() -> None:
     return get_cache_pool().flushdb()

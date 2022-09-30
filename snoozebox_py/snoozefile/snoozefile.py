@@ -23,7 +23,7 @@ def generate_snoozefile(path: Path = None):
     with open(path, "r") as file_reader:
         if not file_reader.readlines():
             rtoml.dump(
-                pretty=True, file=open(PathingManager().snoozefile, "w"), obj=contents
+                pretty=True, file=open("snoozefile.toml", "w"), obj=contents
             )
         else:
             print("snoozefile was not empty. Won't write stuff on it")
@@ -31,12 +31,12 @@ def generate_snoozefile(path: Path = None):
 
 def get_occupied_ports() -> list:
     toml_contents: dict = rtoml.load(PathingManager().snoozefile)
-    return toml_contents["services"]["occupied_ports"]
+    return toml_contents["occupied_ports"]
 
 
 def mark_ports_occupied(ports: List[str]) -> None:
     toml_contents: dict = rtoml.load(open(PathingManager().snoozefile, "r"))
-    occupied_ports: list = toml_contents["services"]["occupied_ports"]
+    occupied_ports: list = toml_contents["occupied_ports"]
     occupied_ports += ports
     toml_contents["services"]["occupied_ports"] = occupied_ports
     rtoml.dump(

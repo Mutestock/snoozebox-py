@@ -30,7 +30,7 @@ message {{schematic.name.capitalize()}}Object {
 
 message New{{schematic.name.capitalize()}}Object{
     {% for grpc_variable in non_default_variables: -%}
-    {{grpc_variable.var_type }} {{grpc_variable.var_name}} = {{loop.index}};
+    {% if grpc_variable.varname != "id"%}{{grpc_variable.var_type }} {{grpc_variable.var_name}} = {{loop.index}};{%endif%}
     {% endfor %}
 }
 

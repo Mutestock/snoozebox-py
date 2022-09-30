@@ -9,12 +9,12 @@ from snoozelib.general import (
     get_name_from_sql,
 )
 from snoozelib.checks import *
-from snoozelib.relations import retrofit_relations, M2MAssociationTableInfo, discover_relations, Relation
+from snoozelib.relations import retrofit_relations, M2MAssociationTableInfo
 
 
-
-
-def sql_tables_to_classes(sql_sequences: List[str]) -> Tuple[List[Conversion], List[M2MAssociationTableInfo]]:
+def sql_tables_to_classes(
+    sql_sequences: List[str],
+) -> Tuple[List[Conversion], List[M2MAssociationTableInfo]]:
     collected_statements = []
     collected_association_tables = []
     for sql in sql_sequences:
@@ -30,10 +30,13 @@ def sql_tables_to_classes(sql_sequences: List[str]) -> Tuple[List[Conversion], L
         statements = [_make_class_def(statement) for statement in statements]
         collected_statements += statements
 
-    retrofit_relations(sql_sequences=sql_sequences, statements=collected_statements, association_tables=collected_association_tables)
+    retrofit_relations(
+        sql_sequences=sql_sequences,
+        statements=collected_statements,
+        association_tables=collected_association_tables,
+    )
     [conversion.finalize_sorted_instructions() for conversion in collected_statements]
     return (collected_statements, collected_association_tables)
-
 
 
 def _rinse_pre_class_def(sql: str) -> str:
@@ -46,7 +49,7 @@ def _make_class_def(sql: str) -> Conversion:
     variables: List[str] = _rinse_pre_class_def(sql).split(",")
     conversion: Conversion = Conversion(name=object_name)
     for sql_line in variables:
-        
+
         if not sql_line:
             continue
         if any(
