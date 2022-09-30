@@ -24,6 +24,11 @@ def get_config_with_mode() -> dict:
     if os.getenv("TESTING"):
         print("EXECUTION MODE IS: test")
         return CONFIG["test"]
+    
+    elif os.getenv("PRODUCTION"):
+        print("EXECUTION MODE IS: production")
+        return CONFIG["production"]
+    
 
     print("EXECUTION MODE IS: local")
     return CONFIG["local"]

@@ -8,4 +8,6 @@
     restart: always
     networks:
       - {{config['settings']['docker_compose_network']}}
+    environment:
+      - PRODUCTION=1
 
