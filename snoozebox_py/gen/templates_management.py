@@ -387,7 +387,7 @@ def collect_dependencies(config: Dict) -> None:
             dependencies + config["settings"]["database"]["postgres"]["dependencies"]
         )
         print(
-            "Note: This project uses psycopg2 as its Postgres driver. Secure that the required postgres library is installed on your PC."
+            "Note: This project uses psycopg2 as its Postgres driver. Secure that the required postgres library is installed on your machine."
         )
         print("Check https://www.psycopg.org/install/")
     elif database == "MongoDB":
