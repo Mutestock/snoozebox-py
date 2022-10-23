@@ -6,6 +6,8 @@ def make_error_message(ex: Exception) -> str:
     return f"Err {ex}"
 
 def prepare_object_for_querying(obj: object) -> dict:
+    if type(obj) == dict:
+        return obj
     return {
         key: value
         for (key, value) in obj.__dict__.items()

@@ -71,14 +71,13 @@ message Create{{schematic.name.capitalize()}}Response {
 {%- endif %}
 {% if "read" in config["crud_instructions"] -%}
 message Read{{schematic.name.capitalize()}}Response {
-    New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 1;
+    {{schematic.name.capitalize()}}Object {{schematic.name.lower()}}_object = 1;
     string msg = 2;
 }
 {%- endif %}
 {% if "update" in config["crud_instructions"] -%}
 message Update{{schematic.name.capitalize()}}Response {
-    int32 id = 1;
-    New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 2;
+    string msg = 1;
 }
 {%- endif %}
 {% if "delete" in config["crud_instructions"] -%}
@@ -88,7 +87,7 @@ message Delete{{schematic.name.capitalize()}}Response {
 {%- endif %}
 {% if "read_list" in config["crud_instructions"] -%}
 message Read{{schematic.name.capitalize()}}ListResponse {
-    repeated New{{schematic.name.capitalize()}}Object new_{{schematic.name.lower()}}_object = 1;
+    repeated {{schematic.name.capitalize()}}Object {{schematic.name.lower()}}_objects = 1;
     string msg = 2;
 }
 {%- endif %}
