@@ -1,7 +1,7 @@
 import logging
 from utils.config import CONFIG
 from flask import Flask
-{% if config["database"] == "postgres"%}
+{% if config["database"] == "Postgres"%}
 from connection.postgres_connection import db_init
 {% endif %}
 {% for schematic in schematics -%}
@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 def main() -> None:
     rest_conf: dict = CONFIG["service"]["rest"]
-    {% if config["database"] == "postgres"%}
+    {% if config["database"] == "Postgres"%}
     db_init()
     {% endif %}
     app.run(

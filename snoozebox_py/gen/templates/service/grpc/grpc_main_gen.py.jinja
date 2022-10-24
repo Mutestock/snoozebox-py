@@ -1,6 +1,6 @@
 import grpc
 from concurrent import futures
-{% if config["database"] == "postgres"%}
+{% if config["database"] == "Postgres"%}
 from connection.postgres_connection import db_init
 {% endif %}
 
