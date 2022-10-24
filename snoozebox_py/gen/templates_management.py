@@ -166,7 +166,7 @@ def _run_pg_templates(config: Dict, jinja_env: Environment) -> None:
             render_args={"config": config},
         ),
         TemplateFileStructure(
-            template_path="connection/postgres/pg_gen.py.jinja",
+            template_path="connection/postgres/pg_test.py.jinja",
             generated_file_path=test_dir
             / "test_connection/test_postgres_connection.py",
             jinja_env=jinja_env,
