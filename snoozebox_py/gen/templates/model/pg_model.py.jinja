@@ -24,7 +24,9 @@ class {{ schematic.name.capitalize() }}(Base):
     ) -> None:
         if grpc_{{schematic.name.lower()}}_object:
             {%- for variable_name in schematic.variable_names %}
+            {% if variable_name != "id"%}
             self.{{variable_name}} = grpc_{{schematic.name.lower()}}_object.{{variable_name}}
+            {% endif %}
             {%- endfor %}
         else:
             {%- for variable_name in schematic.variable_names %}

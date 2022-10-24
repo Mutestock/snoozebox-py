@@ -41,7 +41,7 @@ class {{schematic.name.capitalize()}}Handler:
     ) -> {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}Response:
         {{schematic.name.lower()}}: dict = {}
         try:
-            {{schematic.name.lower()}} = self.crud_component.read(request.{{schematic.name.lower()}}_object.id)
+            {{schematic.name.lower()}} = self.crud_component.read(request.id)
             return {{schematic.name.lower()}}_pb2.Read{{schematic.name.capitalize()}}Response(
                 {{schematic.name.lower()}}_object={{schematic.name.lower()}}, msg=SUCCESFUL_TRANSACTION
             )
@@ -55,9 +55,10 @@ class {{schematic.name.capitalize()}}Handler:
     def update(
         self, request: {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Request
     ) -> {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Response:
+        {{schematic.name.lower()}}: dict = {}
         try:
-            {{schematic.name.lower()}} = {{schematic.name.capitalize()}}(grpc_{{schematic.name.lower()}}_object=request[1])
-            self.crud_component.update(id=request.new_{{schematic.name.lower()}}_object.id, obj={{schematic.name.lower()}})
+            {{schematic.name.lower()}} = {{schematic.name.capitalize()}}(grpc_{{schematic.name.lower()}}_object=request.new_{{schematic.name.lower()}}_object)
+            self.crud_component.update(id=request.id, obj={{schematic.name.lower()}})
             return {{schematic.name.lower()}}_pb2.Update{{schematic.name.capitalize()}}Response(msg=SUCCESFUL_TRANSACTION)
         except Exception as ex:
             logging.error(
