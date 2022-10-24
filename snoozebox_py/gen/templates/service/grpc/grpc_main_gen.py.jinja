@@ -1,5 +1,8 @@
 import grpc
 from concurrent import futures
+{% if config["database"] == "postgres"%}
+from connection.postgres_connection import db_init
+{% endif %}
 
 from utils.config import CONFIG
 {% for schematic in schematics -%}
@@ -10,6 +13,7 @@ from service.routes.{{schematic.name.lower()}}_routes import {{schematic.name.ca
 {% endfor %}
 
 def main() -> None:
+    db_init()
     uri = f"{CONFIG['service']['grpc']['host']}:{CONFIG['service']['grpc']['port']}"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     print(f"GRPC: running on {uri}")

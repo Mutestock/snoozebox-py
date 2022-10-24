@@ -264,8 +264,7 @@ def _run_grpc_templates(config: Dict, jinja_env: Environment) -> None:
     ]
 
     if (
-        not f"{config['project_name']}_grpc_service:"
-        in open(docker_compose, "r").read()
+        f"{config['project_name']}_grpc_service:" not in open(docker_compose, "r") . read()
     ):
         template_file_structure.append(
             TemplateFileStructure(
@@ -455,7 +454,7 @@ def _run_rest_templates(config: Dict, jinja_env: Environment):
             template_path="service/rest/rest_main_gen.py.jinja",
             generated_file_path=src / "main.py",
             jinja_env=jinja_env,
-            render_args={"schematics": config["schematics"]},
+            render_args={"schematics": config["schematics"], "config": config},
         ),
         TemplateFileStructure(
             template_path="misc/rest_dockerfile.jinja",
