@@ -1,3 +1,10 @@
+# Disclaimer
+
+This project was an exam project. The exam has been finalized. Therefore this repository should be considered abandoned.
+It's a functional prototype, but should only be considered as such. There are flaws, and I would take some other approach if I were to create such a project again.
+A link to a scuffed demo video and report can be found in the resources directory
+
+
 # Introduction
 
 (wip)
